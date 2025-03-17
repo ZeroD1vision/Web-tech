@@ -3,6 +3,9 @@
 #include <cstring>
 #include <sstream>
 #include <ctime>
+#ifdef __GNUC__
+    #define _WIN32_WINNT 0x600
+#endif
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -67,8 +70,17 @@ int main() {
     sockaddr_in server;                                          // Структура, содержит информацию о сервере, к которому присоединяемся    
     server.sin_family = AF_INET;                                 // Указываем, что используем IPv4
     server.sin_port = htons(serverPort);                         // Преобразуем порт в сетевой порядок байтов
-    inet_pton(AF_INET, serverAddress.c_str(), &server.sin_addr); // Преобразуем строку IP-адреса в формат, используемый в sockaddr_in
-
+    //inet_pton(AF_INET, serverAddress.c_str(), &server.sin_addr); // Преобразуем строку IP-адреса в формат, используемый в sockaddr_in
+    server.sin_port = htons(serverPort); // Преобразуем порт в сетевой порядок байтов
+    
+    // Использование inet_addr вместо inet_pton
+    server.sin_addr.s_addr = inet_addr(serverAddress.c_str());
+    if (server.sin_addr.s_addr == INADDR_NONE) {
+        logEvent("Некорректный IP-адрес: " + serverAddress);
+        closesocket(sock);
+        WSACleanup();
+        return 1;
+    }
     /**
     * Подключение к серверу.
     *  
