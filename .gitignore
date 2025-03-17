@@ -12,4 +12,5 @@ tasks.json
 launch.json
 
 # Игнорировать все файлы конфигурации
-*.vscode
+.vscode/
+
