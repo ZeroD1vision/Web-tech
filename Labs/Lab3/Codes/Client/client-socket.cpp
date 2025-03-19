@@ -3,11 +3,13 @@
 #include <cstring>
 #include <sstream>
 #include <ctime>
+#ifdef __GNUC__
+    #define _WIN32_WINNT 0x0501
+#endif
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
 #pragma comment(lib, "ws2_32.lib") // Подключение библиотеки Winsock
-
 
 /**
  * Функция для записи события в лог-файл.
@@ -24,7 +26,6 @@ void logEvent(const std::string& message) {
         logFile.close();
     }
 }
-
 
 /**
  * Основная функция клиента.
@@ -43,13 +44,24 @@ int main() {
     }
 
     // Загрузка конфигурации
-    std::string serverAddress = "127.0.0.1"; // По умолчанию
-    int serverPort = 65432;                  // По умолчанию
+    std::string serverAddress = "127.0.0.1"; // IP-адрес умолчанию
+    int serverPort = 65432;                  // Порт по умолчанию
 
     // Чтение конфигурации из файла
     std::ifstream configFile("config.txt");
     if (configFile.is_open()) {
-        configFile >> serverAddress >> serverPort;
+        std::string line;
+        while (std::getline(configFile, line)) {
+            std::istringstream configStream(line);
+            std::string key;
+            if (configStream >> key) {
+                if (key == "ip_address") {
+                    configStream >> serverAddress; // Чтение IP-адреса
+                } else if (key == "port") {
+                    configStream >> serverPort; // Чтение порта
+                }
+            }
+        }
         configFile.close();
     } else {
         logEvent("Не удалось открыть файл конфигурации. Используются настройки по умолчанию.");
@@ -67,8 +79,15 @@ int main() {
     sockaddr_in server;                                          // Структура, содержит информацию о сервере, к которому присоединяемся    
     server.sin_family = AF_INET;                                 // Указываем, что используем IPv4
     server.sin_port = htons(serverPort);                         // Преобразуем порт в сетевой порядок байтов
-    inet_pton(AF_INET, serverAddress.c_str(), &server.sin_addr); // Преобразуем строку IP-адреса в формат, используемый в sockaddr_in
+    server.sin_addr.s_addr = inet_addr(serverAddress.c_str());   // Преобразуем строку IP-адреса в формат, используемый в sockaddr_in
+    //inet_pton(AF_INET, serverAddress.c_str(), &server.sin_addr);
 
+    if (server.sin_addr.s_addr == INADDR_NONE) {
+        logEvent("Некорректный IP-адрес: " + serverAddress);
+        closesocket(sock);
+        WSACleanup();
+        return 1;
+    }
     /**
     * Подключение к серверу.
     *  
@@ -113,7 +132,7 @@ int main() {
     int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
     
     if (bytesReceived > 0) {
-        buffer[bytesReceived] = '\0'; // Завершение строки
+        buffer[bytesReceived] = '\0';
         logEvent("Получено сообщение от сервера: " + std::string(buffer));
     } else if (bytesReceived == SOCKET_ERROR) {
         logEvent("Ошибка получения сообщения от сервера: " + std::to_string(WSAGetLastError()));
