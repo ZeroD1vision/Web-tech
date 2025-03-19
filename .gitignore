@@ -2,8 +2,9 @@
 *.tmp
 *.log
 
-# Игнорировать папку node_modules
+# Игнорировать папки
 node_modules/
+ignored/
 
 # Игнорировать файлы конфигурации
 config.json
@@ -13,4 +14,3 @@ launch.json
 
 # Игнорировать все файлы конфигурации
 .vscode/
-
