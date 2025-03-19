@@ -4,6 +4,7 @@
 
 # Игнорировать папку node_modules
 node_modules/
+ignored/
 
 # Игнорировать файлы конфигурации
 config.json
