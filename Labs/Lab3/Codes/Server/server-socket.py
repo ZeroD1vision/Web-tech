@@ -13,9 +13,20 @@ logging.basicConfig(filename='server_log.txt',
                     )
 
 def log_event(message):
+    """
+    Функция для записи события в лог.
+    
+    :param message: Сообщение, которое будет записано в лог.
+    """
     logging.info(message)
 
 def start_server(host='127.0.0.1', port=2371):
+    """
+    Функция для запуска TCP-сервера.
+    
+    :param host: Хост, на котором будет запущен сервер (по умолчанию '127.0.0.1').
+    :param port: Порт, на котором будет слушать сервер (по умолчанию 2371).
+    """
     # Создаем сокет для сервера
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((host, port))    # Привязываем сокет к хосту и порту
