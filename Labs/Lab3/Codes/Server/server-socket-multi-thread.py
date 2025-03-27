@@ -2,6 +2,7 @@ import socket
 import time
 import logging
 import threading
+import os
 from datetime import datetime
 
 # Настройка логирования, чтобы записывать события в файл
@@ -52,7 +53,7 @@ def start_server(host='127.0.0.1', port=2371):
             # Создаем новый поток для обработки клиента
             client_thread = threading.Thread(target=client_processing, args=(client_socket, addr))
             client_thread.start()  # Запускаем поток
-                
+            
 
 if __name__ == "__main__":
     start_server()  # Запускаем сервер
