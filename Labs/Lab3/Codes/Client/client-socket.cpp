@@ -45,7 +45,7 @@ int main() {
 
     // Загрузка конфигурации
     std::string serverAddress = "127.0.0.1"; // IP-адрес умолчанию
-    int serverPort = 65432;                  // Порт по умолчанию
+    int serverPort = 2371;                  // Порт по умолчанию
 
     // Чтение конфигурации из файла
     std::ifstream configFile("config.txt");
