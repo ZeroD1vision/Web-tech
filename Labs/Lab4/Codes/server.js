@@ -3,7 +3,7 @@ const http = require('http');// Модуль для создания HTTP сер
 const fs = require('fs');    // Модуль для работы с файловой системой
 const path = require('path');// Модуль для работы с путями файловой системы
 
-const PORT = 8080; // Порт, на котором будет работать сервер
+const PORT = 2371; // Порт, на котором будет работать сервер
 
 // Создаем HTTP сервер
 const server = http.createServer((req, res) => {
@@ -29,7 +29,7 @@ const server = http.createServer((req, res) => {
             break;
         case '/404-image.jpg':
             // Изображение для 404 ошибки
-            filePath = path.join(__dirname, 'public', '404-image.jpg');
+            filePath = path.join(__dirname, 'public', 'image/404-image.jpg');
             break;
         default:
             // Если запрашиваемая страница не найдена, возвращаем 404 ошибку
