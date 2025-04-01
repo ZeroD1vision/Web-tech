@@ -9,6 +9,8 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+using namespace std;
+
 #pragma comment(lib, "ws2_32.lib") // Подключение библиотеки Winsock
 
 /****************************************************************************
@@ -20,7 +22,7 @@ void logEvent(const std::string& message) {
     std::ofstream logFile("client_log.txt", std::ios_base::app);
     if (logFile.is_open()) {
         time_t now = time(0);
-        char* dt = ctime(&now);
+        char* dt = ctime(&now); // Строка для хранения времени
         dt[strlen(dt) - 1] = '\0'; // Удаляем символ новой строки
         logFile << dt << " - " << message << std::endl;
         logFile.close();
@@ -128,7 +130,7 @@ int main() {
     * записывается сообщение об ошибке. Если сервер закрыл соединение,
     * также записывается соответствующее сообщение.
     */
-    char buffer[1024] = {0};
+    char buffer[1024] = {0}; // Буфер для хранения собщения
     int bytesReceived = recv(sock, buffer, sizeof(buffer) - 1, 0);
     
     if (bytesReceived > 0) {
