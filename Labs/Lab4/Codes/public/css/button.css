@@ -1,0 +1,14 @@
+/* Стили для кнопки "Вернуться на главную страницу" */
+a.button {
+    display: inline-block; /* Делаем ссылку блочным элементом */
+    background-color: #1397a8; /* Цвет фона */
+    color: white; /* Цвет текста */
+    padding: 10px 20px; /* Отступы */
+    text-decoration: none; /* Убираем подчеркивание */
+    border-radius: 5px; /* Закругление углов */
+    transition: background-color 0.3s; /* Плавный переход при наведении */
+}
+
+a.button:hover {
+    background-color: #066462; /* Цвет фона при наведении */
+}
