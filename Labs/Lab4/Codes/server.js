@@ -1,5 +1,6 @@
 // Импортируем необходимые модули
 const http = require('http');// Модуль для создания HTTP сервера
+const querystring = require('querystring');
 const fs = require('fs');    // Модуль для работы с файловой системой
 const path = require('path');// Модуль для работы с путями файловой системы
 const os = require('os');
@@ -50,12 +51,53 @@ function getIp(callback){
         }
     });
 }
+
+
 // Создаем HTTP сервер
 getIp((ipAddress) => {
     const server = http.createServer((req, res) => {
-        let filePath = ''; // Путь к файлу
         console.log(req.url);
+        
+        // Обработка POST-запроса
 
+        if(req.method === 'POST' && req.url === '/submit') {
+            let data = '';
+
+            req.on('data', chunk => {
+                data += chunk.toString();
+            });
+
+            req.on('end', () => {
+                try { 
+                    // Парсим JSON из POST-данных
+                    const querydata = querystring.parse(data);
+                    const input = querydata.input; // Получаем значение поля input
+                    console.log('Полученные данные: ', querydata);
+
+                    // Записываем данные в файл
+                    fs.appendFile('data.txt', `${input}\n`, (err) => { 
+                        if (err) {
+                            console.error('Ошибка при записи в файл:', err);
+                            res.writeHead(500, {'Content-Type': 'text/plain'})
+                            res.end('Ошибка сервера');
+                            return;
+                        } else {
+                            res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+                            res.end('<h1>Данные успешно отправлены!</h1>');
+                        }
+                    });
+                } catch (error) {
+                    console.error('Ошибка при парсинге JSON:', error);
+                    res.writeHead(400, { 'Content-Type': 'text/plain' });
+                    res.end('Некорректный JSON');
+                }
+            });
+            return;// Возвращаем, чтобы не продолжать обработку запроса
+        }
+
+        // Обработка GET-запросов для статических файлов
+
+        let filePath = ''; // Путь к файлу
         // Определяем, какой файл нужно вернуть в зависимости от URL запроса
         switch (req.url) {
             // Главная страница
@@ -78,13 +120,14 @@ getIp((ipAddress) => {
                 // Изображение для 404 ошибки
                 filePath = path.join(__dirname, 'public', '/images/404-image.jpg');
                 break;
-                case '/css/styles.css':
-                    case '/css/button.css':
-                        filePath = path.join(__dirname, 'public', 'css', req.url.split('/')[2]);
+            case '/css/styles.css':
+            case '/css/button.css':
+            case '/css/single-styles.css':
+                filePath = path.join(__dirname, 'public', 'css',req.url.split('/')[2]);
                 break;
             default:
                 // Если запрашиваемая страница не найдена, возвращаем 404   ошибку
-                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8'});
                 res.end('<h1>404 - Страница не найдена</h1><a href="/   ">Вернуться на главную страницу</a>');
                 return;
             }
@@ -122,7 +165,8 @@ getIp((ipAddress) => {
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content); // Отправляем содержимое файла
         });
-    });// Обработчик ошибок
+    });
+
     server.on('error', (err) => {
         console.error('Ошибка сервера:', err);
     });

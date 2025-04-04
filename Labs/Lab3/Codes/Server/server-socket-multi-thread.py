@@ -40,10 +40,10 @@ def client_processing(client_socket, addr):
         log_event("Отправлено сообщение клиенту: {}".format(response_message))
 
 
-def start_server(host='127.0.0.1', port=2371):
+def start_server(host='192.168.107.193', port=2371):
     # Создаем сокет для сервера
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
-        server_socket.bind(('127.0.0.1', 2371))  # Привязываем сокет к хосту и порту
+        server_socket.bind(('192.168.107.193', 2371))  # Привязываем сокет к хосту и порту
         server_socket.listen()  # Начинаем слушать входящие соединения
         log_event("Сервер запущен на {}: {}".format(host, port))
         
