@@ -1,8 +1,9 @@
 /* Стили для ссылок на другие страницы сайта */
 .link-page {
     display: inline-block;
-    margin: 7px 0;
-    padding: 7px 9px;
+    margin: 7px 10px;
+    border: none; /* Убираем границу */
+    padding: 7px 15px;
     background-color: #1397a8; /* Синий фон */
     color: white; /* Белый текст */
     text-decoration: none; /* Убираем подчеркивание */
@@ -17,7 +18,7 @@
 /* Стили для ссылок на контакты */
 .link-contact {
     color: #068684; /* Зеленый текст */
-    text-decoration: underline; /* Подчеркивание */
+    /*text-decoration: underline; /* Подчеркивание */
     font-weight: bold; /* Жирный текст */
     margin: 10px 0;
 }

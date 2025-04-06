@@ -1,30 +1,3 @@
-/* Основные стили страницы */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #e4e4e4;
-    margin: 0; /* Убирает внешние отступы */
-    padding: 20px; /* Добавляет внутренние отступы по 20 пикселей */
-}
-
-h1 {
-    color: #333;
-}
-
-table {
-    width: 600px;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table, th, td {
-    border: 1px solid #ccc;
-}
-
-th, td {
-    padding: 10px;
-    text-align: left;
-}
-
 /* Стили для навигационного меню */
 nav {
     background-color: #052d38; /* Темно-серый фон */
