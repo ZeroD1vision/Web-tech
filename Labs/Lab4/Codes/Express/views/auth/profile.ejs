@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/button.css">
+    <link rel="stylesheet" href="./css/links.css">
+    <title>Профиль пользователя - <%= user.username %></title>
+</head>
+<body>
+    <header>
+        <h1>Профиль пользователя</h1>
+        <nav>
+            <ul>
+                <li><a href="/">Главная</a></li>
+                <li><a href="/logout">Выйти</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <h2>Информация о пользователе</h2>
+        <div class="user-info">
+            <p><strong>Имя пользователя:</strong> <%= user.username %></p>
+            <p><strong>Email:</strong> <%= user.email %></p>
+            <p><strong>Дата регистрации:</strong> <%= user.registrationDate %></p>
+        </div>
+
+        <a href="/edit-profile" class="button">Редактировать профиль</a>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Нарзиев Артемий</p>
+    </footer>
+</body>
+</html>
