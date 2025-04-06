@@ -1,0 +1,28 @@
+/* Стили для ссылок на другие страницы сайта */
+.link-page {
+    display: inline-block;
+    margin: 7px 10px;
+    border: none; /* Убираем границу */
+    padding: 7px 15px;
+    background-color: #1397a8; /* Синий фон */
+    color: white; /* Белый текст */
+    text-decoration: none; /* Убираем подчеркивание */
+    border-radius: 5px; /* Скругленные углы */
+    transition: background-color 0.3s; /* Плавный переход цвета фона */
+}
+
+.link-page:hover {
+    background-color: #053c49; /* Темно-синий фон при наведении */
+}
+
+/* Стили для ссылок на контакты */
+.link-contact {
+    color: #068684; /* Зеленый текст */
+    /*text-decoration: underline; /* Подчеркивание */
+    font-weight: bold; /* Жирный текст */
+    margin: 10px 0;
+}
+
+.link-contact:hover {
+    color: #074442; /* Темно-зеленый текст при наведении */
+}
