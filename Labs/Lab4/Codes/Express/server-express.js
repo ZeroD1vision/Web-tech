@@ -1,20 +1,19 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const LocalStrategy = require('passport-local').Strategy;
 const morgan = require('morgan');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
+const bcrypt = require('bcrypt');
 const authRoutes = require('./routes/authRoutes');
 const authController = require('./controllers/authController');
 const { getIp } = require('./utils/network.js');
-
+const users = require('./models/userModel');
 
 const app = express();
-const PORT = 4000; // Порт, на котором будет работать сервер
-
-console.log(typeof authController.loginUser ); // Должно вывести 'function'
-
+const PORT = 4000; // Порт, на котором будет работать сервер'
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -23,12 +22,79 @@ app.use(cookieParser());
 app.use(morgan('combined', { stream: fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flags: 'a' }) }));
 
 // Passport middleware
-app.use(session({ secret: 'your_secret_key', resave: false, saveUninitialized: true }));
+app.use(session({ 
+    secret: 'your_secret_key', 
+    resave: false, 
+    saveUninitialized: true 
+}));
+
+// Инициализация Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Сериализация и десериализация пользователя
+passport.serializeUser ((user, done) => {
+    done(null, user.username); // Сохраняем только имя пользователя в сессии
+});
+
+passport.deserializeUser ((username, done) => {
+    console.log('Попытка десериализации пользователя:', username);
+    const user = users.find(u => u.username === username);
+    if (user) {
+        console.log('Пользователь найден');
+        done(null, user); // Если пользователь найден, передаем его
+    } else {
+        done(new Error('Пользователь не найден')); // Если не найден, передаем ошибку
+    }
+});
+
+// Регистрация стратегии "local"
+passport.use(new LocalStrategy(
+    async (username, password, done) => {
+        console.log('Вход пользователя (main): ', { username, password }); // Вывод имени пользователя и пароля
+        // Проверка существования пользователя в массиве
+        const user = users.find(u => u.username === username);
+        if (!user) {
+            console.log('Неверное имя пользователя: ', { username });
+            return done(null, false, { message: 'Неверное имя пользователя.' });
+        }
+        // Сравнение паролей(проверка)
+        // Сравнение паролей (проверка)
+        console.log('Сравнение паролей:', { введённый: password, хэшированный: user.password });
+
+        try {
+            const isMatch = await bcrypt.compare(password, user.password);
+            console.log('Результат сравнения паролей:', isMatch);
+
+            if (!isMatch) {
+                console.log('Неверный пароль');
+                return done(null, false, { message: 'Неверный пароль.' });
+            }
+
+            console.log('Пароли совпадают!'); // Логируем успешное совпадение
+
+            // Можно выполнить дополнительные действия здесь, если пароли совпадают
+
+            return done(null, user); // Аутентификация успешна
+        } catch (err) {
+            console.error('Ошибка при сравнении паролей:', err);
+            return done(err);
+        }
+    }
+));
+        /* Если храним пароли не хэшированными
+        if (user.password !== password) { // Пароли хранятся в открытом виде
+            console.log('Неверный пароль');
+            return done(null, false, { message: 'Неверный пароль.' });
+        }
+        return done(null, user); // Успешная аутентификация
+    }
+));*/
+
+
+
 // Подключаем маршруты
-app.use('/auth', authRoutes);
+app.use('/', authRoutes);
 
 // Главная страница
 app.get('/', (req, res) => {
