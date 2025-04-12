@@ -1,4 +1,6 @@
-let users = []; // Хранилище пользователей
+const users = []; // Хранилище пользователей
+
+module.exports = users;
 
 // Функция для добавления пользователя
 exports.addUser  = (user) => {
