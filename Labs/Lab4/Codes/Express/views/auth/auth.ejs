@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/styles.css">
-    <link rel="stylesheet" href="./css/button.css">
-    <link rel="stylesheet" href="./css/links.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/button.css">
+    <link rel="stylesheet" href="/css/links.css">
+    <link rel="stylesheet" href="/css/notifications.css">
+    
     <title><%= title %></title>
 </head>
 <body>
@@ -20,5 +22,38 @@
     <p><%= linkRegLogText %>
         <a href="<%= linkHrefRegLog %>" class="link-contact"><%= linkHrefRegLogLabel %></a>
     </p>
+    <!-- Блок для уведомлений -->
+    <div id="notification"></div>
+
+    <script>
+        // Функция для отображения уведомления
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            const successMessage = window.success_msg || "<%= successMessage %>";
+            notification.textContent = successMessage; // Устанавливаем текст уведомления
+            notification.classList.remove('error'); // Убираем класс ошибки
+            notification.style.display = 'block'; // Показываем уведомление
+
+            // Скрыть уведомление через 3 секунды
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Если есть ошибки, показываем их
+        window.onload = function() {
+            const notification = document.getElementById('notification');
+            if (window.errors && window.errors.length > 0) {
+                notification.textContent = window.errors.join(", "); // Объединяем ошибки в строку
+                notification.classList.add('error'); // Добавляем класс ошибки
+                notification.style.display = 'block'; // Показываем уведомление
+
+                // Скрыть уведомление через 5 секунд
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 5000);
+            }
+        };
+    </script>
 </body>
 </html>

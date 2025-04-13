@@ -13,7 +13,8 @@ const { getIp } = require('./utils/network.js');
 const users = require('./models/userModel');
 
 const app = express();
-const PORT = 4000; // Порт, на котором будет работать сервер'
+const PORT = 4000;
+
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -58,8 +59,8 @@ passport.use(new LocalStrategy(
             console.log('Неверное имя пользователя: ', { username });
             return done(null, false, { message: 'Неверное имя пользователя.' });
         }
+
         // Сравнение паролей(проверка)
-        // Сравнение паролей (проверка)
         console.log('Сравнение паролей:', { введённый: password, хэшированный: user.password });
 
         try {
@@ -94,7 +95,7 @@ passport.use(new LocalStrategy(
 
 
 // Подключаем маршруты
-app.use('/', authRoutes);
+app.use('/profile', authRoutes);
 
 // Главная страница
 app.get('/', (req, res) => {
@@ -149,29 +150,34 @@ app.get('/image', (req, res) => {
 });
 
 // Страница входа
-app.get('/login', (req, res) => {
+app.get('/profile/login', (req, res) => {
     res.render('auth/auth', {
         title: 'Вход',
-        action: '/login',
+        action: '/profile/login',
         buttonText: 'Войти',
+        successMessage: 'Вы успешно вошли в профиль!',
         linkRegLogText: 'Нет аккаунта?',
-        linkHrefRegLog: '/register',
+        linkHrefRegLog: '/profile/register',
         linkHrefRegLogLabel: 'Зарегистрироваться'
     });
 });
 
 // Страница регистрации
-app.get('/register', (req, res) => {
+app.get('/profile/register', (req, res) => {
     res.render('auth/auth', {
         title: 'Регистрация',
-        action: '/register',
+        action: '/profile/register',
         buttonText: 'Зарегистрироваться',
+        successMessage: 'Вы успешно зарегистрировались!',
         linkRegLogText: 'Уже есть аккаунт?',
-        linkHrefRegLog: '/login',
+        linkHrefRegLog: '/profile/login',
         linkHrefRegLogLabel: 'Войти'
     });
 });
 
+app.get('/profile/edit', (req, res) => {
+    res.render('auth/edit');
+});
 // Статические файлы
 app.use(express.static(path.join(__dirname, 'public')));
 
