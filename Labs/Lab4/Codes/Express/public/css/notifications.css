@@ -1,0 +1,24 @@
+/* notifications.css */
+#notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #4CAF50; /* Зеленый цвет по умолчанию */
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    display: none; /* Скрыто по умолчанию */
+    z-index: 1000; /* На переднем плане */
+}
+
+#error {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    display: none; /* Скрыто по умолчанию */
+    z-index: 1000; /* На переднем плане */
+    background-color: #f44336; /* Красный цвет для ошибок */
+}
