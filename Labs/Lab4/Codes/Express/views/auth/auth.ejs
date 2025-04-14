@@ -7,53 +7,86 @@
     <link rel="stylesheet" href="/css/button.css">
     <link rel="stylesheet" href="/css/links.css">
     <link rel="stylesheet" href="/css/notifications.css">
-    
     <title><%= title %></title>
 </head>
 <body>
     <h1><%= title %></h1>
-    <form action="<%= action %>" method="POST">
-        <input type="text" name="username" required 
+    <form id="<%= formType%>" action="<%= action %>" method="POST">
+        <input type="text" name="username" id="username" required 
         placeholder="Имя пользователя">
-        <input type="password" name="password" required 
+        <input type="password" name="password" id="password" required 
         placeholder="Пароль">
         <button type="submit" class="link-page"><%= buttonText %></button>
     </form>
     <p><%= linkRegLogText %>
         <a href="<%= linkHrefRegLog %>" class="link-contact"><%= linkHrefRegLogLabel %></a>
     </p>
-    <!-- Блок для уведомлений -->
+    
+    <!-- Блоки уведомлений -->
     <div id="notification"></div>
+    <div id="error"></div>
 
-    <script>
-        // Функция для отображения уведомления
-        function showNotification() {
-            const notification = document.getElementById('notification');
-            const successMessage = window.success_msg || "<%= successMessage %>";
-            notification.textContent = successMessage; // Устанавливаем текст уведомления
-            notification.classList.remove('error'); // Убираем класс ошибки
-            notification.style.display = 'block'; // Показываем уведомление
+    <script type="module" defer>
+        import { loginUser  } from '/js/notifications.js';
 
-            // Скрыть уведомление через 3 секунды
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('login-form').addEventListener('submit', loginUser );
+        });
+    </script>
 
-        // Если есть ошибки, показываем их
-        window.onload = function() {
-            const notification = document.getElementById('notification');
-            if (window.errors && window.errors.length > 0) {
-                notification.textContent = window.errors.join(", "); // Объединяем ошибки в строку
-                notification.classList.add('error'); // Добавляем класс ошибки
-                notification.style.display = 'block'; // Показываем уведомление
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('login-form').addEventListener('submit', loginUser  );
 
-                // Скрыть уведомление через 5 секунд
+            async function loginUser  (event) {
+                event.preventDefault(); // Предотвращаем стандартное поведение формы
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Отправка данных на сервер
+                try {
+                    const response = await fetch('/profile/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password }),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showNotification(result.message); // Успешное сообщение
+                        setTimeout(() => {
+                            window.location.href = '/profile/profile'; // Перенаправление на профиль
+                        }, 1200); // Покажем уведомление хотя бы 1.2 сек
+                    } else {
+                        showError(result.error || 'Произошла ошибка при входе.'); // Ошибка
+                    }
+                } catch (error) {
+                    showError('Произошла ошибка при отправке данных.'); // Ошибка отправки
+                }
+            }
+
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.style.display = 'block';
                 setTimeout(() => {
                     notification.style.display = 'none';
+                }, 3000);
+            }
+
+            function showError(message) {
+                const error = document.getElementById('error');
+                error.textContent = message;
+                error.style.display = 'block';
+                setTimeout(() => {
+                    error.style.display = 'none';
                 }, 5000);
             }
-        };
+        });
     </script>
+    <script src="/js/notifications.js" defer></script> -->
 </body>
 </html>
