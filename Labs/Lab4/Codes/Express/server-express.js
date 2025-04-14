@@ -10,7 +10,7 @@ const bcrypt = require('bcrypt');
 const authRoutes = require('./routes/authRoutes');
 const authController = require('./controllers/authController');
 const { getIp } = require('./utils/network.js');
-const users = require('./models/userModel');
+const { users } = require('./models/userModel');
 
 const app = express();
 const PORT = 4000;
@@ -153,6 +153,7 @@ app.get('/image', (req, res) => {
 app.get('/profile/login', (req, res) => {
     res.render('auth/auth', {
         title: 'Вход',
+        formType: 'login-form',
         action: '/profile/login',
         buttonText: 'Войти',
         successMessage: 'Вы успешно вошли в профиль!',
@@ -167,6 +168,7 @@ app.get('/profile/register', (req, res) => {
     res.render('auth/auth', {
         title: 'Регистрация',
         action: '/profile/register',
+        formType: 'register-form',
         buttonText: 'Зарегистрироваться',
         successMessage: 'Вы успешно зарегистрировались!',
         linkRegLogText: 'Уже есть аккаунт?',

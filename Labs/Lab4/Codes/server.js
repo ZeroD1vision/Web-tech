@@ -122,11 +122,13 @@ getIp((ipAddress) => {
                 break;
             case '/css/styles.css':
             case '/css/button.css':
-            case '/css/single-styles.css':
-                filePath = path.join(__dirname, 'public', 'css',req.url.split('/')[2]);
+            case '/css/styles.css':
+            case '/css/links.css':
+            case '/css/droplist.css':
+                filePath = path.join(__dirname, 'public', 'css', req.url.split('/')[2]);
                 break;
             default:
-                // Если запрашиваемая страница не найдена, возвращаем 404   ошибку
+                // Если запрашиваемая страница не найдена, возвращаем 404 ошибку
                 res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8'});
                 res.end('<h1>404 - Страница не найдена</h1><a href="/   ">Вернуться на главную страницу</a>');
                 return;

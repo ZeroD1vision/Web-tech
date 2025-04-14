@@ -1,10 +1,13 @@
-const { users, addUser, findUserByUsername, nickameExists, nicknameExists } =
+const { users, addUser, findUserByUsername, nicknameExists } =
     require('../models/userModel');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 
 // Регистрация пользователя
 exports.registerUser  = (req, res) => {
+    console.log('Тип users:', typeof users); // Это должно вывести 'object'
+console.log('Содержимое users:', users); // Это должно вывести текущий массив пользователей
+
     console.log('Регистрация пользователя:', req.body);
     const { username, password } = req.body;
 
@@ -26,7 +29,7 @@ exports.registerUser  = (req, res) => {
                            nickname: randomname, 
                            password: hashedPassword };
 
-        addUser.user (newUser );
+        addUser(newUser );
 
         console.log('Пользователи после регистрации:', users); // Логируем массив пользователей
         
@@ -66,12 +69,25 @@ exports.checkNickname = (req, res) => {
 exports.loginUser  = (req, res, next) => {
     passport.authenticate('local', (err, user, info) => { // Обработка результата newLocalStrategy
         console.log('Вход пользователя(controller)');
-        if (err) return res.status(500).send('Ошибка аутентификации');
+        /*if (err) return res.status(500).send('Ошибка аутентификации');
         if (!user) return res.status(401).send('Неверное имя пользователя или пароль');
         
         req.logIn(user, (err) => {
             if (err) return res.status(500).send('Ошибка входа');
             return res.redirect('/profile/profile'); // Перенаправление на профиль после успешного входа
+        });*/
+        if (err) {
+            return res.status(500).json({ error: 'Ошибка аутентификации' });
+        }
+        if (!user) {
+            return res.status(401).json({ error: 'Неверное имя пользователя или пароль' });
+        }
+        
+        req.logIn(user, (err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Ошибка входа' });
+            }
+            return res.status(200).json({ message: 'Успешный вход!' }); // Отправка успешного сообщения
         });
     })(req, res, next);
 };
