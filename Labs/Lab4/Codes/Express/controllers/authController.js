@@ -1,4 +1,5 @@
-const users = require('../models/userModel'); // Модель пользователя, если используем базу данных
+const { users, addUser, findUserByUsername, nickameExists, nicknameExists } =
+    require('../models/userModel');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 
@@ -10,7 +11,7 @@ exports.registerUser  = (req, res) => {
     // Генерируем уникальный никнейм для нового пользователя
     const randomname = generateGuestNickname();
 
-    const existingUser  = users.find(u => u.username === username);
+    const existingUser  = findUserByUsername (username);
     if (existingUser ) {
         return res.status(400).send('Пользователь с таким именем уже существует.');
     }
@@ -24,7 +25,8 @@ exports.registerUser  = (req, res) => {
         const newUser  = { username, 
                            nickname: randomname, 
                            password: hashedPassword };
-        users.push(newUser );
+
+        addUser.user (newUser );
 
         console.log('Пользователи после регистрации:', users); // Логируем массив пользователей
         
@@ -42,7 +44,8 @@ const generateGuestNickname = () => {
     let number = 1000;
 
     // Проверяем существующие никнеймы
-    while (users.some(user => user.nickname === `${baseNickname}${number}`)) {
+    //while (users.some(user => user.nickname === `${baseNickname}${number}`)) {
+    while (nicknameExists(`${baseNickname}${number}`)) {
         number++;
     }
 
@@ -54,7 +57,8 @@ exports.checkNickname = (req, res) => {
     const { nickname } = req.body;
 
     // Проверяем, существует ли никнейм в массиве пользователей
-    const exists = users.some(user => user.nickname === nickname);
+    //const exists = users.some(user => user.nickname === nickname);
+    const exists = nicknameExists(nickname);
     res.json({ isUnique: !exists });
 };
 
