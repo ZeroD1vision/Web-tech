@@ -11,6 +11,7 @@ const authRoutes = require('./routes/authRoutes');
 const authController = require('./controllers/authController');
 const { getIp } = require('./utils/network.js');
 const { users } = require('./models/userModel');
+const movieRoutes = require('./routes/movieRoutes');
 
 const app = express();
 const PORT = 4000;
@@ -95,7 +96,8 @@ passport.use(new LocalStrategy(
 
 
 // Подключаем маршруты
-app.use('/profile', authRoutes);
+app.use('/', movieRoutes); // Для списка фильмов
+app.use('/profile', authRoutes); // Для страницы профиля
 
 // Главная страница
 app.get('/', (req, res) => {
