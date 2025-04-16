@@ -7,7 +7,7 @@ async function setupDatabase() {
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(50) NOT NULL,
-                role VARCHAR(20) NOT NULL DEFAULT 'user',
+                role VARCHAR(20) NOT NULL DEFAULT 'user',  -- 'admin' или 'user'
                 last_login TIMESTAMP,
                 is_active BOOLEAN NOT NULL DEFAULT TRUE
             );
