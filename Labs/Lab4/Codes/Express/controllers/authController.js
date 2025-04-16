@@ -1,25 +1,22 @@
-const { users, addUser, findUserByUsername, nicknameExists } =
-    require('../models/userModel');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const { pool, addUserToDB, findUserByUsernameInDB, nicknameExists } = require('../config/db');
+
 
 // Регистрация пользователя
-exports.registerUser  = (req, res) => {
-    console.log('Тип users:', typeof users); // Это должно вывести 'object'
-console.log('Содержимое users:', users); // Это должно вывести текущий массив пользователей
-
+exports.registerUser  = async (req, res) => {
     console.log('Регистрация пользователя:', req.body);
     const { username, password } = req.body;
 
     // Генерируем уникальный никнейм для нового пользователя
     const randomname = generateGuestNickname();
 
-    const existingUser  = findUserByUsername (username);
+    const existingUser  = await findUserByUsernameInDB(username);
     if (existingUser ) {
         return res.status(400).send('Пользователь с таким именем уже существует.');
     }
     
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
+    bcrypt.hash(password, 10, async (err, hashedPassword) => {
         console.log('Please help');
         if (err) {
             return res.status(500).send('Ошибка хеширования пароля');
@@ -29,7 +26,7 @@ console.log('Содержимое users:', users); // Это должно выв
                            nickname: randomname, 
                            password: hashedPassword };
 
-        addUser(newUser );
+        await addUserToDB(newUser );
 
         console.log('Пользователи после регистрации:', users); // Логируем массив пользователей
         
@@ -56,18 +53,25 @@ const generateGuestNickname = () => {
 };
 
 // Проверка уникальности никнейма
-exports.checkNickname = (req, res) => {
-    const { nickname } = req.body;
+exports.checkNickname = async (req, res) => {
+    const { nickname, currentNickname } = req.body;
 
-    // Проверяем, существует ли никнейм в массиве пользователей
-    //const exists = users.some(user => user.nickname === nickname);
-    const exists = nicknameExists(nickname);
-    res.json({ isUnique: !exists });
+    // Если новый никнейм совпадает с текущим, возвращаем, что он уникален
+    if (nickname === currentNickname) {
+        return res.json({ isUnique: true });
+    }
+
+    try {
+        const exists = await nicknameExists(nickname); // Проверяем уникальность
+        res.json({ isUnique: !exists });
+    } catch (error) {
+        res.status(500).json({ error: 'Ошибка при проверке никнейма.' });
+    }
 };
 
 // Вход пользователя
 exports.loginUser  = (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => { // Обработка результата newLocalStrategy
+    passport.authenticate('local', async (err, user, info) => { // Обработка результата newLocalStrategy
         console.log('Вход пользователя(controller)');
         /*if (err) return res.status(500).send('Ошибка аутентификации');
         if (!user) return res.status(401).send('Неверное имя пользователя или пароль');
@@ -118,10 +122,12 @@ exports.logout = (req, res) => {
 
 // Обновление профиля
 exports.updateProfile = async (req, res) => {
+    const userId = req.user.id; // Используем ID пользователя из сессии
     const { nickname, email, birthDate } = req.body;
 
     try {
-        // Находим пользователя в массиве пользователей по имени пользователя
+        /*Без БД 
+        Находим пользователя в массиве пользователей по имени пользователя
         const userID = users.findIndex(u => u.username === req.user.username); // Или используйте другой уникальный идентификатор
         if (userID === -1) {
             return res.status(404).json({ error: 'Пользователь не найден.' });
@@ -130,9 +136,38 @@ exports.updateProfile = async (req, res) => {
         // Обновляем данные пользователя
         users[userID].nickname = nickname; // Обновление псевдонима
         users[userID].email = email;
-        users[userID].birthDate = new Date(birthDate); // Преобразование строки в объект Date
+        users[userID].birthDate = new Date(birthDate); // Преобразование строки в объект Date*/
+        const currentUser = await pool.query('SELECT nickname FROM users WHERE id = \$1', [userId]);
+        console.log(userId);
+        
+        if (currentUser.rows.length === 0) {
+            return res.status(404).json({ error: 'Пользователь не найден.' });
+        }
 
-        // Отправьте сообщение об успехе
+        const currentNickname = currentUser.rows[0].nickname;
+
+        // Если никнейм не изменился, просто обновляем другие поля
+        if (nickname === currentNickname) {
+            await pool.query(
+                'UPDATE users SET email = \$1, birthDate = \$2 WHERE id = \$3',
+                [email, new Date(birthDate), userId]
+            );
+            return res.json({ success: 'Ваш профиль успешно обновлен!' });
+        }
+
+        // Если никнейм изменился проверяем уникальность 
+        const exists = await nicknameExists(nickname);
+        if (exists) {
+            return res.status(400).json({ error: 'Никнейм уже существует.' });
+        }
+
+        // Обновляем никнейм и другие поля
+        await pool.query(
+            'UPDATE users SET nickname = \$1, email = \$2, birthDate = \$3 WHERE id = \$4',
+            [nickname, email, new Date(birthDate), userId]
+        );
+
+        // Отправляем сообщение об успехе
         console.log('Отправляемые данные:', { nickname, email, birthDate });
         return res.json({ success: 'Ваш профиль успешно обновлен!' });
     } catch (err) {

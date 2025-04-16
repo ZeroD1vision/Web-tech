@@ -19,6 +19,8 @@
         <div id="error" class="error" style="display: none;"></div>
 
         <form id="profile-form">
+            <input type="hidden" id="userId" name="userId" value="<%= user.id %>"> <!-- Скрытое поле для userId -->
+            
             <div class="form-group">
                 <label for="nickname">Имя (псевдоним):</label>
                 <input type="text" id="nickname" name="nickname" value="<%= user.nickname %>" required>
@@ -43,22 +45,20 @@
         // Функция для отображения уведомлений
         document.getElementById('profile-form').addEventListener('submit', async function(event) {
             event.preventDefault(); // Предотвращаем стандартное поведение формы
-
+            
+            const userId = document.getElementById('userId').value;
             const nickname = document.getElementById('nickname').value;
             const email = document.getElementById('email').value;
             const birthDate = document.getElementById('birthDate').value;
 
             // Проверка уникальности никнейма
             const isNicknameUnique = await checkNickname(nickname);
-            if (!isNicknameUnique) {
-                showError('Этот никнейм уже занят. Пожалуйста, выберите другой.');
-                return; // Остановка отправки формы
-            }
             // Валидация формы
             if (!email.includes('@')) {
                 showError('Пожалуйста, введите корректный email.');
                 return; // Остановка отправки формы
             }
+
 
             // Отправка данных на сервер
             try {
@@ -67,7 +67,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ nickname, email, birthDate }),
+                    body: JSON.stringify({ userId, nickname, email, birthDate }), 
                 });
 
                 const result = await response.json();

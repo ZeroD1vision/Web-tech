@@ -12,6 +12,7 @@ const authController = require('./controllers/authController');
 const { getIp } = require('./utils/network.js');
 const { users } = require('./models/userModel');
 const movieRoutes = require('./routes/movieRoutes');
+const db = require('./config/db');
 
 const app = express();
 const PORT = 4000;
@@ -36,17 +37,22 @@ app.use(passport.session());
 
 // Сериализация и десериализация пользователя
 passport.serializeUser ((user, done) => {
-    done(null, user.username); // Сохраняем только имя пользователя в сессии
+    done(null, user.id); // Сохраняем идентификатор пользователя в сессии
 });
 
-passport.deserializeUser ((username, done) => {
-    console.log('Попытка десериализации пользователя:', username);
-    const user = users.find(u => u.username === username);
-    if (user) {
-        console.log('Пользователь найден');
-        done(null, user); // Если пользователь найден, передаем его
-    } else {
-        done(new Error('Пользователь не найден')); // Если не найден, передаем ошибку
+passport.deserializeUser (async (id, done) => {
+    console.log('Попытка десериализации пользователя:', id);
+    try {
+        const user = await db.findUserById(id);
+        if (user) {
+            console.log('Пользователь найден');
+            done(null, user); // Если пользователь найден, передаем его
+        } else {
+            done(new Error('Пользователь не найден')); // Если не найден, передаем ошибку
+        }
+    } catch (error) {
+        console.error('Ошибка при десериализации:', error);
+        done(error); // Обрабатываем ошибку
     }
 });
 
@@ -54,17 +60,17 @@ passport.deserializeUser ((username, done) => {
 passport.use(new LocalStrategy(
     async (username, password, done) => {
         console.log('Вход пользователя (main): ', { username, password }); // Вывод имени пользователя и пароля
-        // Проверка существования пользователя в массиве
-        const user = users.find(u => u.username === username);
-        if (!user) {
-            console.log('Неверное имя пользователя: ', { username });
-            return done(null, false, { message: 'Неверное имя пользователя.' });
-        }
-
-        // Сравнение паролей(проверка)
-        console.log('Сравнение паролей:', { введённый: password, хэшированный: user.password });
-
         try {
+            // Получаем пользователя из базы данных
+            const user = await db.findUserByUsernameInDB(username);
+            if (!user) {
+                console.log('Неверное имя пользователя: ', { username });
+                return done(null, false, { message: 'Неверное имя пользователя.' });
+            }
+
+            // Сравнение паролей (проверка)
+            console.log('Сравнение паролей:', { введённый: password, хэшированный: user.password });
+
             const isMatch = await bcrypt.compare(password, user.password);
             console.log('Результат сравнения паролей:', isMatch);
 
@@ -79,7 +85,7 @@ passport.use(new LocalStrategy(
 
             return done(null, user); // Аутентификация успешна
         } catch (err) {
-            console.error('Ошибка при сравнении паролей:', err);
+            console.error('Ошибка при аутентификации:', err);
             return done(err);
         }
     }
