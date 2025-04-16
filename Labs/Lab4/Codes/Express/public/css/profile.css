@@ -1,0 +1,51 @@
+/* Основные стили для контейнера */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9; /* Светлый фон для контейнера */
+    border-radius: 10px; /* Сглаженные углы контейнера */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Легкая тень для контейнера */
+}
+
+/* Стили для заголовков */
+h3 {
+    color: #074442; /* Темный цвет для заголовка */
+    text-align: center;
+}
+
+/* Стили для формы */
+.form-group {
+    margin-bottom: 15px; /* Отступ между группами формы */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px; /* Отступ между меткой и полем ввода */
+    color: #074442; /* Цвет меток */
+}
+
+input[type="text"],
+input[type="email"],
+input[type="date"] {
+    width: 100%; /* Полная ширина полей ввода */
+    padding: 10px; /* Отступ внутри полей */
+    border: 1px solid #7cbab3; /* Цвет рамки полей */
+    border-radius: 5px; /* Сглаженные углы для полей ввода */
+    box-sizing: border-box; /* Учитываем отступы и границы в ширине */
+}
+
+/* Стили для кнопки */
+.button {
+    background-color: #7cbab3; /* Цвет фона кнопки */
+    color: #ffffff; /* Цвет текста кнопки */
+    padding: 10px 15px; /* Отступы внутри кнопки */
+    border: none; /* Убираем рамку */
+    border-radius: 5px; /* Сглаженные углы для кнопки */
+    cursor: pointer; /* Указатель при наведении */
+    transition: background-color 0.3s; /* Плавный переход для фона */
+}
+
+.button:hover {
+    background-color: #074442; /* Цвет кнопки при наведении */
+}
