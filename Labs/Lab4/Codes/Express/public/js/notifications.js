@@ -58,6 +58,15 @@ export async function loginUser (event) {
         showError('Произошла ошибка при отправке данных.');
     }
 }
+
+// Ждем загрузки DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Привязываем функции к событиям отправки форм
+    document.getElementById('profile-form').addEventListener('submit', updateProfile);
+    document.getElementById('login-form').addEventListener('submit', loginUser );
+
+    console.log('DOM полностью загружен и разобран');
+});
 /*
     // Пример функции для отображения уведомлений
     function showNotification(message) {

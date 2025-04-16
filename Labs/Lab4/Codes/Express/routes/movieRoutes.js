@@ -4,10 +4,10 @@ const { isAdmin } = require('../middleware/adminMiddleware');
 const router = express.Router();
 
 // Маршрут для страницы списка фильмов
-router.get('/movies', movieController.getMovies);
+router.get('/movies', isAdmin, movieController.getMovies);
 
 // Страница информации о фильме
-//router.get('/movies/:id', movieController.getMovieById);
+//router.get('/films/:id', movieController.getMovieById);
 
 // Страница редактирования листа
 router.get('/movies/edit', isAdmin, movieController.editList);

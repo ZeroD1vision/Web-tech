@@ -1,24 +1,15 @@
-const users = []; // Хранилище пользователей
-
-// Функция для добавления пользователя
-const addUser  = (user) => {
-    users.push(user);
-};
-
-// Функция для поиска пользователя по имени
-const findUserByUsername = (username) => {
-    return users.find(user => user.username === username);
-};
-
-// Функция для проверки существования никнейма
-const nicknameExists = (nickname) => {
-    return users.some(user => user.nickname === nickname);
-};
+//const db = require('../config/db');
 
 // Функция для получения всех пользователей (если потребуется)
-const getAllUsers = () => {
-    return users;
+const getAllUsers = async () => {
+    try {
+        const result = await pool.query('SELECT * FROM users');
+        return result.rows; // Возвращаем массив всех пользователей
+    } catch (error) {
+        console.error('Ошибка при получении всех пользователей:', error);
+        throw error; // Обрабатываем ошибку, если необходимо
+    }
 };
 
 // Экспортируем функции и массив пользователей
-module.exports = { users, addUser , findUserByUsername, nicknameExists, getAllUsers };
+module.exports = { getAllUsers };
