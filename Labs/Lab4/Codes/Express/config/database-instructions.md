@@ -85,6 +85,12 @@
   ```sql
   SELECT * FROM <table_name>;
   ```
+- **Запрос столбцов**:
+  ```sql
+  SELECT column_name, data_type, is_nullable
+  FROM information_schema.columns
+  WHERE table_name = 'users';
+    ```
 
 ## Таблицы
   `ALTER TABLE` и `CREATE TABLE` — это команды SQL, используемые для управления таблицами в реляционных базах данных. Давайте подробнее рассмотрим каждую из них.
