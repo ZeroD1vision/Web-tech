@@ -19,7 +19,30 @@ let sessions = {}; // Объект для хранения сессий
 
 
 // Настройка Passport
-passport.use(new LocalStrategy((username, password, done) => {
+passport.use(new LocalStrategy(
+    async (username, password, done) => {
+        try {
+            // Поиск пользователя в БД
+            const result = await pool.query('SELECT * FROM users WHERE username = \$1', [username]);
+            const user = result.rows[0];
+
+            if(!user) {
+                return done(null, false, {message: 'Неверный пароль'});
+            }
+
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                return done(null, false, { message: 'Неверный пароль.' });
+            }
+
+            // Успешная аутентификация
+            return done(null, user);
+        } catch (error) {
+            return done(error);
+        }
+    }
+));
+/*passport.use(new LocalStrategy((username, password, done) => {
     const user = users.find(user => user.username === username);
     if(!user)
         return done(null, false, {message: 'Неверное имя пользователя.'});
@@ -32,7 +55,7 @@ passport.use(new LocalStrategy((username, password, done) => {
             return done(null, false, {message: 'Неверный пароль.'});
         }
     });
-}));
+}));*/
 
 
 passport.serializeUser((user, done) => {
