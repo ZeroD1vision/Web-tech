@@ -1,0 +1,32 @@
+/* Стили для выпадающего списка */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #7cbab3; /* Цвет фона выпадающего меню */
+    width: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 8px;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content a {
+    color: #ffffff; /* Белый текст для ссылок в выпадающем меню */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    transition: background-color 0.3s;
+}
+
+.dropdown-content a:hover {
+    background-color: #074442; /* Цвет при наведении на ссылки в выпадающем меню */
+    border-radius: 8px; /* Сглаженные углы для ссылок при наведении */
+}
