@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/moviesList.css">
+</head>
+<body>
+    <h1><%= title %></h1>
+
+    <!-- Кнопка редактирования, отображается только для администраторов -->
+    <% if (isAdmin) { %>
+        <button onclick="window.location.href='/movies/edit'" class="edit-button">Редактировать список фильмов</button>
+    <% } %>
+    <!--  -->
+
+    <div class="movie-grid">
+        <% movies.forEach(movie => { %>
+            <div class="movie-card" 
+                onclick="window.location.href='/movies/<%= movie.id %>'" 
+                onmouseover="showModal('<%= movie.title %>', '<%= movie.description %>', '<%= movie.trailerId %>', this)" 
+                onmouseout="handleMouseOut(this)">
+                <div class="movie-image-container">
+                    <img src="<%= movie.image %>" alt="<%= movie.title %>" class="movie-image">
+                    <div class="movie-info">
+                        <h3><%= movie.title %></h3>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+    
+    <div id="modal" class="modal" onmouseover="keepModalOpen()" onmouseout="handleMouseOut()">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modal-title"></h2>
+        <p id="modal-description"></p>
+        <iframe id="modal-trailer" width="100%" height="315" src="" frameborder="0" allowfullscreen></iframe>
+    </div>
+
+    <a href="/">На главную</a>
+
+    <!-- Блоки уведомлений -->
+    <div id="notification"></div>
+    <div id="error"></div>
+
+    <script type="module" defer>
+        import { checkIfAdmin } from '/js/notifications.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверяем права администратора сразу при загрузке страницы
+            checkIfAdmin();
+        });
+    </script>
+
+    <script>
+        let isModalOpen = false; // Переменная для отслеживания состояния модального окна
+        let isMouseOverModal = false; // Переменная для отслеживания, находится ли курсор над модальным окном
+        let isMouseOverCard = false; // Переменная для отслеживания, находится ли курсор над карточкой
+
+        function showModal(title, description, trailerId, card) {
+            if (isModalOpen) return; // Не показывать, если модальное окно уже открыто
+            isModalOpen = true; // Устанавливаем флаг, что модальное окно открыто
+
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-description').innerText = description;
+            const modalTrailer = document.getElementById('modal-trailer');
+            modalTrailer.src = `https://www.youtube.com/embed/${trailerId}?autoplay=1`; // Включаем autoplay
+            const modal = document.getElementById('modal');
+            modal.style.display = 'block'; // Показываем модальное окно
+            
+            // Позиционируем модальное окно поверх карточки
+            const cardRect = card.getBoundingClientRect();
+            modal.style.top = `${cardRect.bottom + window.scrollY - 10}px`; // Позиционируем ниже карточки
+            modal.style.left = `${cardRect.left}px`;
+            modal.style.width = `${cardRect.width}px`; // Ширина модального окна равна ширине карточки
+        }
+
+        function handleMouseEnter(card) {
+            isMouseOverCard = true; // Устанавливаем флаг, что курсор над карточкой
+            showModal('Название фильма', 'Описание фильма', 'ид_видео', card);
+        }
+        
+        function handleMouseOut(card) {
+            // Если курсор уходит с карточки, устанавливаем флаг
+            isMouseOverCard = false;
+            checkMousePosition();
+        }
+
+        function checkMousePosition() {
+            // Проверяем, если курсор не над карточкой и не над модальным окном, скрываем модальное окно
+            if (!isMouseOverModal && !isMouseOverCard) {
+                hideModal();
+            }
+        }
+
+        function keepModalOpen() {
+            isMouseOverModal = true; // Устанавливаем флаг, что курсор над модальным окном
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none'; // Скрываем модальное окно
+            isModalOpen = false; // Сбрасываем флаг состояния модального окна
+            isMouseOverModal = false; // Сбрасываем флаг состояния курсора над модальным окном
+            document.getElementById('modal-trailer').src = ''; // Очищаем источник видео, чтобы остановить воспроизведение
+        }
+
+        function handleModalMouseOut() {
+            isMouseOverModal = false; 
+            checkMousePosition();
+        }
+
+        function closeModal() {
+            hideModal();
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+/* Стили для навигационного меню */
+nav {
+    background-color: #052d38; /* Темно-серый фон */
+    padding: 5px; /* Отступы вокруг меню */
+    border-radius: 15px; /* Скругленные углы */
+}
+
+nav ul {
+    list-style-type: none; /* Без маркеров списка*/
+    margin: 0; /* Без маргинов */
+    padding: 0; /* Без отступов */
+    display: flex; /* В строку */
+    justify-content: space-around; /* Расположение элементов равномерно */
+}
+
+nav li {
+    position: relative; /* Позволяет использовать относительное позиционирование для дочерних элементов */
+    margin: 0 10px; /* Отступы между пунктами меню */
+    flex: 1; /* Каждый пункт меню занимает равную долю пространства */
+}
+
+nav a {
+    display: flex;
+    justify-content:center; /*Центрируем содержимое по горизонтали */
+    align-items: center; /* Центрируем содержимое по вертикали */
+    color: white;
+    text-decoration: none;
+    padding: 10px 0px;
+    border-radius: 10px;
+    transition: background-color 1s;
+    height: 50%; /* Задаем высоту 50% для заполнения области */
+}
+
+nav a:hover {
+    background-color: #10171e; 
+    color: white;
+}
