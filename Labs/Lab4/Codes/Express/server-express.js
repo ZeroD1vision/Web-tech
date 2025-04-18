@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const LocalStrategy = require('passport-local').Strategy;
+const NodeCache = require('node-cache');
 const morgan = require('morgan');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -10,34 +11,42 @@ const bcrypt = require('bcrypt');
 const authRoutes = require('./routes/authRoutes');
 const authController = require('./controllers/authController');
 const { getIp } = require('./utils/network.js');
-const { users } = require('./models/userModel');
 const movieRoutes = require('./routes/movieRoutes');
 const db = require('./config/db');
+const bodyParserMiddleware = require('./middleware/bodyParserMiddleware');
+const cookieMiddleware = require('./middleware/cookieMiddleware');
+const loggerMiddleware = require('./middleware/loggerMiddleware');
+const sessionMiddleware = require('./middleware/sessionMiddleware');
+const passportMiddleware = require('./middleware/passportMiddleware');
+const cacheMiddleware = require('./middleware/cacheMiddleware');
 
 const app = express();
 const PORT = 4000;
 
+// Middleware для отключения кэширования для определенного маршрута
+app.use('/movies', (req, res, next) => {
+    res.set('Cache-Control', 'no-store'); // Отключить кэширование
+    next();
+});
 
-// Middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cookieParser());
-app.use(morgan('combined', { stream: fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flags: 'a' }) }));
-
-// Passport middleware
-app.use(session({ 
-    secret: 'your_secret_key', 
-    resave: false, 
-    saveUninitialized: true 
-}));
-
-// Инициализация Passport
-app.use(passport.initialize());
-app.use(passport.session());
+// Подключаем middleware
+app.use(bodyParserMiddleware);
+app.use(cookieMiddleware);
+app.use(loggerMiddleware);
+app.use(sessionMiddleware);
+app.use(passportMiddleware);
+app.use(cacheMiddleware);
 
 // Сериализация и десериализация пользователя
 passport.serializeUser ((user, done) => {
+    console.log('Полученный пользователь:', user); // Логируем полученного пользователя
+
+    if (user && user.id) {
+        console.log('Сериализация пользователя:', user);
     done(null, user.id); // Сохраняем идентификатор пользователя в сессии
+    } else {
+        done(new Error('Пользователь не имеет идентификатора'));
+    }
 });
 
 passport.deserializeUser (async (id, done) => {
@@ -63,6 +72,7 @@ passport.use(new LocalStrategy(
         try {
             // Получаем пользователя из базы данных
             const user = await db.findUserByUsernameInDB(username);
+            console.log('Полученный пользователь:', user); // Логируем полученного пользователя
             if (!user) {
                 console.log('Неверное имя пользователя: ', { username });
                 return done(null, false, { message: 'Неверное имя пользователя.' });
@@ -98,7 +108,6 @@ passport.use(new LocalStrategy(
         return done(null, user); // Успешная аутентификация
     }
 ));*/
-
 
 
 // Подключаем маршруты

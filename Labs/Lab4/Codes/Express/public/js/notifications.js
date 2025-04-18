@@ -59,10 +59,41 @@ export async function loginUser (event) {
     }
 }
 
+export async function checkIfAdmin() {
+    try {
+        const response = await fetch ('/profile/check-admin', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!user.ok) {
+            showError('Пользователь не авторизован');
+            return; // Завершаем выполнение функции, если пользователь не авторизован
+        }
+
+        const result = await response.json();
+
+        if(response.ok){
+            // Если пользователь администратор, выполняем нужные действия
+            if (result.isAdmin) {
+                showNotification('Вы являетесь администратором.');
+                // Здесь можно добавить дополнительную логику для администраторов
+            } else {
+                showError('У вас нет прав администратора.');
+            }
+        } else {
+            showError(result.error || 'Произошла ошибка при проверке прав.');
+        }
+    } catch (error) {
+        showError('Произошла ошибка при отправке данных.');
+    }
+}
+
 // Ждем загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
     // Привязываем функции к событиям отправки форм
-    document.getElementById('profile-form').addEventListener('submit', updateProfile);
     document.getElementById('login-form').addEventListener('submit', loginUser );
 
     console.log('DOM полностью загружен и разобран');

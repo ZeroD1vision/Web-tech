@@ -2,9 +2,9 @@
 const { pool } = require('../config/db');
 
 const isAdmin = async (req, res, next) => {
-    if (!req.user || !req.user.id) {
+    /*if (!req.user || !req.user.id) {
         return res.status(401).json({ message: 'Пользователь не авторизован' });
-    }
+    }*/
 
     const userId = req.user.id;
 

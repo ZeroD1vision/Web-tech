@@ -25,6 +25,8 @@ const getAllMovies = async () => {
 
 // Функция для получения фильма по ID
 const getMovieById = async (id) => {
+    console.log('Movie ID:', id); // Логируем ID перед выполнением запроса
+
     if (!id) {
         throw new Error('ID cannot be undefined or null');
     }
@@ -35,8 +37,28 @@ const getMovieById = async (id) => {
 // Функция для добавления пользователя в базу данных
 const addUserToDB = async (user) => {
     const { username, nickname, password } = user;
-    const query = 'INSERT INTO users (username, nickname, password) VALUES (\$1, \$2, \$3)';
-    await pool.query(query, [username, nickname, password]);
+
+    // Проверяем, существует ли никнейм
+    if (await nicknameExists(nickname)) {
+        throw new Error('Никнейм уже существует. Пожалуйста, выберите другой.');
+    }
+
+    const query = 'INSERT INTO users (username, nickname, password) VALUES (\$1, \$2, \$3) RETURNING *';
+    const values = [user.username, user.nickname, user.password];
+    
+    try {
+        const result = await pool.query(query, values);
+
+        // Логируем результат запроса
+        console.log('Результат вставки:', result.rows[0]);
+        
+        console.log('Пользователь успешно добавлен в базу данных.');
+        // Возвращаем созданного пользователя с его id
+        return result.rows[0];
+    } catch (error) {
+        console.error('Ошибка при добавлении пользователя в базу данных:', error);
+        throw error; // Перебрасываем ошибку для дальнейшей обработки
+    }
 };
 
 const findUserById = async (id) => {
@@ -51,6 +73,7 @@ const nicknameExists = async (nickname) => {
 
     try {
         const result = await pool.query(query, values);
+        console.log('Результат проверки никнейма:', parseInt(result.rows[0].count));
         return parseInt(result.rows[0].count) > 0; // Если количество больше 0, никнейм существует
     } catch (error) {
         console.error('Ошибка при проверке никнейма:', error);
@@ -65,6 +88,7 @@ const findUserByUsernameInDB = async (username) => {
     }
     const query = 'SELECT * FROM users WHERE username = \$1';
     const result = await pool.query(query, [username]);
+    console.log('Результат запроса:', result.rows[0]);
     return result.rows[0]; // Возвращает первого найденного пользователя или undefined
 };
 
@@ -74,6 +98,66 @@ const getAllUsersFromDB = async () => {
     return res.rows;
 };
 
+const updateMovie = async (id, updatedData) => {
+    const { title, description, image } = updatedData;
+    const query = `
+        UPDATE movies
+        SET title = \$1, description = \$2, image = \$3
+        WHERE id = \$4
+    `;
+
+    try {
+        const result = await pool.query(query, [title, description, image, id]);
+        return result.rowCount > 0; // Возвращаем true, если обновление прошло успешно
+    } catch (error) {
+        console.error('Ошибка обновления фильма:', error);
+        throw error; // Пробрасываем ошибку дальше для обработки в контроллере
+    }
+};
+
+const deleteMovieById = async (id) => {
+    console.log(id);
+    try {
+        console.log('await');
+        const result = await pool.query('DELETE FROM movies WHERE id = \$1', [id]);
+        console.log('afterawait');
+        console.log(result);
+        return true;
+    } catch (err) {
+        console.error(err);
+        throw new Error('Ошибка сервера'); // Генерируем ошибку для обработки в контроллере
+    }
+};
+
+const updateMoviePosition = async (movieId, newPosition) => {
+    // Получаем текущую позицию элемента
+    const currentMovie = await getMovieById(movieId);
+    const currentPosition = currentMovie.position;
+
+    // Если новая позиция меньше текущей, увеличиваем позицию всех элементов между текущей и новой
+    if (newPosition < currentPosition) {
+        await db.query(`
+            UPDATE movies
+            SET position = position + 1
+            WHERE position >= \$1 AND position < \$2
+        `, [newPosition, currentPosition]);
+    } else if (newPosition > currentPosition) {
+        // Если новая позиция больше текущей, уменьшаем позицию всех элементов между текущей и новой
+        await db.query(`
+            UPDATE movies
+            SET position = position - 1
+            WHERE position > \$1 AND position <= \$2
+        `, [currentPosition, newPosition]);
+    }
+
+    // Обновляем позицию самого элемента
+    await db.query(`
+        UPDATE movies
+        SET position = \$1
+        WHERE id = \$2
+    `, [newPosition, movieId]);
+}
+
 module.exports = {
     addUserToDB,
     findUserById,
@@ -82,5 +166,8 @@ module.exports = {
     getAllMovies,
     getMovieById,
     nicknameExists,
+    updateMovie,
+    updateMoviePosition,
+    deleteMovieById,
     pool,
 };

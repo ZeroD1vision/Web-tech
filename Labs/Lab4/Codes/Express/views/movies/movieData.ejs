@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Редактировать фильм: <%= movie.title %></h1>
-    <form action="/movies/edit/<%= movie.id %>" method="POST">
+    <form action="/movies/<%= movie.id %>/edit" method="POST">
         <label for="title">Название:</label>
         <input type="text" id="title" name="title" value="<%= movie.title %>" required>
 
