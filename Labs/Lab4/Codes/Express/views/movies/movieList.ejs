@@ -18,7 +18,7 @@
     <div class="movie-grid">
         <% movies.forEach(movie => { %>
             <div class="movie-card" 
-                onclick="window.location.href='/films/<%= movie.id %>'" 
+                onclick="window.location.href='/movies/<%= movie.id %>'" 
                 onmouseover="showModal('<%= movie.title %>', '<%= movie.description %>', '<%= movie.trailerId %>', this)" 
                 onmouseout="handleMouseOut(this)">
                 <div class="movie-image-container">
@@ -39,6 +39,19 @@
     </div>
 
     <a href="/">На главную</a>
+
+    <!-- Блоки уведомлений -->
+    <div id="notification"></div>
+    <div id="error"></div>
+
+    <script type="module" defer>
+        import { checkIfAdmin } from '/js/notifications.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверяем права администратора сразу при загрузке страницы
+            checkIfAdmin();
+        });
+    </script>
 
     <script>
         let isModalOpen = false; // Переменная для отслеживания состояния модального окна
@@ -65,7 +78,7 @@
 
         function handleMouseEnter(card) {
             isMouseOverCard = true; // Устанавливаем флаг, что курсор над карточкой
-            showModal('Название фильма', 'Описание фильма', 'ваш_ид_видео', card); // Замените на реальные данные
+            showModal('Название фильма', 'Описание фильма', 'ид_видео', card);
         }
         
         function handleMouseOut(card) {
@@ -93,44 +106,13 @@
             document.getElementById('modal-trailer').src = ''; // Очищаем источник видео, чтобы остановить воспроизведение
         }
 
-        /*function handleModalMouseOut() {
-            isMouseOverModal = false; // Устанавливаем флаг в false, когда курсор уходит из модального окна
-            checkMousePosition();
-            // Проверяем, если курсор не над карточкой, скрываем модальное окно
-            setTimeout(() => {
-                /*if (!isMouseOverModal) {
-                    hideModal();
-                }*/
-                /*const modal = document.getElementById('modal');
-                const movieCards = document.querySelectorAll('.movie-card');
-                
-                // Проверяем, находится ли курсор над любой карточкой
-                const isMouseOverAnyCard = Array.from(movieCards).some(card => {
-                    const rect = card.getBoundingClientRect();
-                    const mouseX = event.clientX;
-                    const mouseY = event.clientY;
-                    return (
-                        mouseX >= rect.left &&
-                        mouseX <= rect.right &&
-                        mouseY >= rect.top &&
-                        mouseY <= rect.bottom
-                    );
-                });
-
-                // Если курсор не над карточкой и не над модальным окном, скрываем модальное окно
-                if (!isMouseOverAnyCard) {
-                    hideModal();
-                }
-            }, 100); // Небольшая задержка для предотвращения мгновенного скрытия//
-        }*/
-
         function handleModalMouseOut() {
             isMouseOverModal = false; 
             checkMousePosition();
         }
 
         function closeModal() {
-            hideModal(); // Используем функцию hideModal для закрытия
+            hideModal();
         }
 
     </script>
