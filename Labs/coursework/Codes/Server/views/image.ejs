@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Страница с картинкой</title>
+    <link rel="stylesheet" href="./css/button.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Центрирование по горизонтали */
+            justify-content: center; /* Центрирование по вертикали */
+            height: 100vh; /* Высота на весь экран */
+            margin: 0; /* Убираем отступы */
+            background-color: #ffffff; /* Цвет фона */
+        }
+
+        img {
+            max-width: 100%; /* Изображение занимает всю ширину контейнера */
+            height: auto; /* Сохраняем пропорции изображения */
+        }
+
+        a {
+            margin-top: 20px; /* Отступ сверху для ссылки */
+            text-decoration: none; /* Убираем подчеркивание */
+            color: #007BFF; /* Цвет ссылки */
+        }
+
+        a:hover {
+            text-decoration: underline; /* Подчеркивание при наведении */
+        }
+    </style>
+</head>
+<body>
+    <h1>Страница с картинкой</h1>
+    <img src="./images/404-image.jpg" alt="Ошибка 404" style="width:600px;"><br>
+    <a href="/" class="button">Вернуться на главную страницу</a>
+</body>
+</html>

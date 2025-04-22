@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать фильм</title>
+</head>
+<body>
+    <h1>Редактировать фильм: <%= movie.title %></h1>
+    <form action="/movies/<%= movie.id %>/edit" method="POST">
+        <label for="title">Название:</label>
+        <input type="text" id="title" name="title" value="<%= movie.title %>" required>
+
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description" required><%= movie.description %></textarea>
+
+        <label for="image">URL изображения:</label>
+        <input type="text" id="image" name="image" value="<%= movie.image %>" required>
+
+        <button type="submit">Сохранить изменения</button>
+    </form>
+    <a href="/movies">Назад к списку фильмов</a>
+</body>
+</html>
