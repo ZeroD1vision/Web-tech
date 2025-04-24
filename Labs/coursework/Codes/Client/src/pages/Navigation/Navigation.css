@@ -1,0 +1,62 @@
+/* Стили навигации */
+.navigation {
+    display: flex;
+    align-items: center;
+    padding: 15px 30px;
+    background: #1a1a1a;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    margin-right: 40px;
+  }
+  
+  .logo img {
+    height: 40px;
+    margin-right: 10px;
+  }
+  
+  .menu-container {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+  }
+  
+  .nav-link {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    padding: 5px 10px;
+    border-radius: 4px;
+  }
+  
+  .nav-link:hover {
+    color: #ff6b6b;
+  }
+  
+  /* Стили футера */
+  .footer {
+    padding: 20px;
+    background: #1a1a1a;
+    color: white;
+    margin-top: 50px;
+    text-align: center;
+  }
+  
+  .footer-links {
+    margin-top: 10px;
+  }
+  
+  /* Общие стили */
+  .error-page {
+    padding: 20px;
+    text-align: center;
+  }
