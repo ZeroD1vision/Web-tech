@@ -1,18 +1,23 @@
-const API_URL = 'http://localhost:5000/api/movies'; // URL вашего сервера
+const API_URL = 'http://localhost:3000/api/movies'; // Исправляем порт на 3000
 
 const fetchMovies = async () => {
     try {
         const response = await fetch(API_URL);
         
         if (!response.ok) {
-            throw new Error('Ошибка сети при получении данных о фильмах');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        return data; // Возвращаем массив фильмов
+        
+        if (data.success) {
+            return data.data; // Возвращаем только массив фильмов
+        } else {
+            throw new Error('Ошибка в структуре ответа сервера');
+        }
     } catch (error) {
         console.error('Ошибка при загрузке фильмов:', error);
-        return []; // Возвращаем пустой массив в случае ошибки
+        throw error; // Пробрасываем ошибку дальше
     }
 };
 
