@@ -14,7 +14,7 @@ const pool = new Pool({
 // Проверяем соединение с базой данных
 pool.connect()
     .then(() => console.log('Подключение к PostgreSQL успешно!'))
-    .catch(err => console.error('Ошибка подключения к PostgreSQL', err.stack));
+    .catch(err => console.error('дключения к PostgreSQL', err.stack));
 
 
 // Функция для получения всех фильмов
@@ -43,8 +43,8 @@ const addUserToDB = async (user) => {
         throw new Error('Никнейм уже существует. Пожалуйста, выберите другой.');
     }
 
-    const query = 'INSERT INTO users (username, nickname, password) VALUES (\$1, \$2, \$3) RETURNING *';
-    const values = [user.username, user.nickname, user.password];
+    const query = 'INSERT INTO users (username, nickname, password, level) VALUES (\$1, \$2, \$3, \$4) RETURNING *';
+    const values = [username, nickname, password, 0]; // Уровень по умолчанию 0
     
     try {
         const result = await pool.query(query, values);
@@ -158,6 +158,19 @@ const updateMoviePosition = async (movieId, newPosition) => {
     `, [newPosition, movieId]);
 }
 
+const getLevelById = async (levelId) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM user_levels WHERE id = $1',
+            [levelId]
+        );
+        return result.rows[0];
+    } catch (error) {
+        console.error('Ошибка получения уровня:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     addUserToDB,
     findUserById,
@@ -169,5 +182,6 @@ module.exports = {
     updateMovie,
     updateMoviePosition,
     deleteMovieById,
+    getLevelById,
     pool,
 };

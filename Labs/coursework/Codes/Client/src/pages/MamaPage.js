@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import fetchMovies from '../services/movieService';
+import { fetchMovies } from '../services/movieService';
 import MovieCard from '../components/MovieCard';
 import SearchBar from '../components/SearchBar';
 
