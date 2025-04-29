@@ -6,6 +6,7 @@ const NodeCache = require('node-cache');
 const morgan = require('morgan');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const authRoutes = require('./routes/authRoutes');
@@ -28,6 +29,8 @@ app.use('/movies', (req, res, next) => {
     res.set('Cache-Control', 'no-store'); // Отключить кэширование
     next();
 });
+
+app.use(cors());
 
 // Подключаем middleware
 app.use(bodyParserMiddleware);

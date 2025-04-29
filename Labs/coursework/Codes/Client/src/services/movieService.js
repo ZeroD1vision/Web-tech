@@ -1,6 +1,6 @@
-const API_URL = 'http://localhost:3000/api/movies'; // Исправляем порт на 3000
+const API_URL = 'http://localhost:3000/api/movies';
 
-const fetchMovies = async () => {
+export const fetchMovies = async () => {
     try {
         const response = await fetch(API_URL);
         
@@ -20,5 +20,3 @@ const fetchMovies = async () => {
         throw error; // Пробрасываем ошибку дальше
     }
 };
-
-export default fetchMovies;

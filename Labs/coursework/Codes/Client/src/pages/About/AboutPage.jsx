@@ -35,7 +35,7 @@ const AboutPage = () => {
             <p>Email: {contacts.email}</p>
           </div>
         </div>
-        <CinemaMap />
+        {<CinemaMap />}
       </section>
 
       <section className="team-section">
