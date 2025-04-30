@@ -1,0 +1,167 @@
+/* Основной контейнер */
+.movie-page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    background: rgba(19, 19, 19, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(197, 166, 66, 0.1);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    min-height: 100vh;
+}
+
+/* Заголовок */
+.movie-header {
+    position: relative;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.gradient-title {
+    background: linear-gradient(45deg, #aa9e51, #c5a642, #ffd700);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 2.8rem;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+    margin: 0;
+}
+
+.back-button {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #c5a642;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.back-button:hover {
+    color: #ffd700;
+}
+
+/* Основной контент */
+.movie-content {
+    display: grid;
+    gap: 30px;
+}
+
+.movie-poster-section {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 30px;
+}
+
+.movie-poster-wrapper {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(161, 161, 16, 0.3);
+}
+
+.movie-poster {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+}
+
+.movie-quick-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(16, 20, 1, 0.9);
+    border-radius: 12px;
+}
+
+.info-block {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(197, 166, 66, 0.1);
+}
+
+.info-label {
+    color: #c5a642;
+    font-weight: 500;
+}
+
+.info-value {
+    color: #c6c6c6;
+}
+
+.rating {
+    color: #ffd700;
+    font-weight: 700;
+}
+
+/* Секции */
+.section-title {
+    color: #c5a642;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, #ffd700, transparent);
+}
+
+.movie-description {
+    color: #c6c6c6;
+    line-height: 1.7;
+    font-size: 1.1rem;
+}
+
+/* Трейлер */
+.trailer-section {
+    margin-top: 30px;
+}
+
+.trailer-embed {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.trailer-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Админ-панель */
+.admin-panel {
+    margin-top: 40px;
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .movie-poster-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .back-button {
+        position: static;
+        margin-bottom: 20px;
+    }
+    
+    .gradient-title {
+        font-size: 2rem;
+    }
+}

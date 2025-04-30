@@ -41,12 +41,16 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         checkAuth();
-    }, [checkAuth]); // Добавляем checkAuth в зависимости
+    }, [checkAuth]);
 
-    const login = async (token, userData) => {
+    const login = (token, userData) => {
         localStorage.setItem('token', token);
-        setUser(userData);
-        await checkAuth(); // Теперь checkAuth доступна здесь
+        setUser({
+            id: userData.id,
+            username: userData.username,
+            role: userData.role, // Сохраняем роль в контексте
+            nickname: userData.nickname
+        });
     };
 
     const logout = () => {

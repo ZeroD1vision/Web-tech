@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { fetchMovies } from '../../services/movieService';
+import { fetchMovies, deleteMovie } from '../../services/movieService';
 import './MovieListPage.css';
 
 const MovieListPage = () => {
@@ -39,6 +39,12 @@ const MovieListPage = () => {
     };
 
     const handleDelete = async (movieId) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showNotification('Требуется авторизация', 'error');
+            return;
+        }
+
         if(!window.confirm('Вы уверены, что хотите удалить этот фильм?')) return;
 
         try {

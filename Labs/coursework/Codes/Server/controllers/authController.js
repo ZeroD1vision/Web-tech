@@ -17,7 +17,11 @@ const registerUser = async (req, res) => {
         });
         
         const token = jwt.sign(
-            { id: user.id, username: user.username },
+            { 
+                id: user.id, 
+                username: user.username,
+                role: user.role
+            },
             JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -28,7 +32,8 @@ const registerUser = async (req, res) => {
             user: {
                 id: user.id,
                 username: user.username,
-                nickname: user.nickname
+                nickname: user.nickname,
+                role: user.role // Добавляем роль в ответ
             },
             message: 'Регистрация прошла успешно!'
         });
@@ -50,7 +55,11 @@ const loginUser = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: user.id, username: user.username },
+            { 
+                id: user.id, 
+                username: user.username,
+                role: user.role // Добавляем роль в токен
+            },
             JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -61,7 +70,8 @@ const loginUser = async (req, res) => {
             user: {
                 id: user.id,
                 username: user.username,
-                nickname: user.nickname
+                nickname: user.nickname,
+                role: user.role // Добавляем роль в ответ
             },
             message: 'Вход выполнен успешно!'
         });
@@ -78,9 +88,11 @@ const getCurrentUser = async (req, res) => {
         const user = await db.findUserById(req.user.id);
         if (!user) throw new Error('Пользователь не найден');
         
-        // Преобразование числовых полей
         const userData = {
-            ...user,
+            id: user.id,
+            username: user.username,
+            nickname: user.nickname,
+            role: user.role, // Явно добавляем роль
             credits: Number(user.credits),
             tickets: Number(user.tickets),
             subscriptions: Number(user.subscriptions)

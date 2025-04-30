@@ -19,19 +19,40 @@ pool.connect()
 
 // Функция для получения всех фильмов
 const getAllMovies = async () => {
-    const res = await pool.query('SELECT * FROM movies');
+    const res = await pool.query(`SELECT * 
+        FROM movies 
+        ORDER BY 
+            CASE WHEN position = 0 THEN 1 ELSE 0 END,
+            position ASC
+    `);
     return res.rows;
 };
 
 // Функция для получения фильма по ID
 const getMovieById = async (id) => {
-    console.log('Movie ID:', id); // Логируем ID перед выполнением запроса
-
-    if (!id) {
-        throw new Error('ID cannot be undefined or null');
-    }
-    const res = await pool.query('SELECT * FROM movies WHERE id = \$1', [id]);
+    const res = await pool.query(
+        'SELECT id, title, description, image, trailerid, position FROM movies WHERE id = $1', 
+        [id]
+    );
     return res.rows[0];
+};
+
+const deleteMovieById = async (id) => {
+    try {
+        const result = await pool.query(
+            'DELETE FROM movies WHERE id = $1 RETURNING *', 
+            [id]
+        );
+        
+        if (result.rowCount === 0) {
+            throw new Error(`Фильм с ID ${id} не найден`);
+        }
+        
+        return result.rows[0];
+    } catch (error) {
+        console.error(`Ошибка удаления фильма ID ${id}:`, error);
+        throw error;
+    }
 };
 
 // Функция для добавления пользователя в базу данных
@@ -83,13 +104,9 @@ const nicknameExists = async (nickname) => {
 
 // Функция для поиска пользователя по имени в базе данных
 const findUserByUsernameInDB = async (username) => {
-    if (!username) {
-        throw new Error('Username cannot be undefined or null');
-    }
-    const query = 'SELECT * FROM users WHERE username = \$1';
+    const query = 'SELECT id, username, password, nickname, role FROM users WHERE username = $1';
     const result = await pool.query(query, [username]);
-    console.log('Результат запроса:', result.rows[0]);
-    return result.rows[0]; // Возвращает первого найденного пользователя или undefined
+    return result.rows[0];
 };
 
 // Функция для получения всех пользователей (при необходимости)
@@ -98,35 +115,40 @@ const getAllUsersFromDB = async () => {
     return res.rows;
 };
 
-const updateMovie = async (id, updatedData) => {
-    const { title, description, image } = updatedData;
+const createMovie = async (movieData) => {
+    const { title, description, image, trailerid, position } = movieData;
+    const query = `
+        INSERT INTO movies (title, description, image, trailerid, position)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+    `;
+    const values = [title, description, image, trailerid, position || 0];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        console.error('Ошибка создания фильма:', error);
+        throw error;
+    }
+}
+
+const updateMovie = async (id, movieData) => {
+    const { title, description, image, trailerid, position } = movieData;
     const query = `
         UPDATE movies
-        SET title = \$1, description = \$2, image = \$3
-        WHERE id = \$4
+        SET title = $1, 
+            description = $2, 
+            image = $3, 
+            trailerid = $4, 
+            position = $5
+        WHERE id = $6
+        RETURNING *
     `;
-
-    try {
-        const result = await pool.query(query, [title, description, image, id]);
-        return result.rowCount > 0; // Возвращаем true, если обновление прошло успешно
-    } catch (error) {
-        console.error('Ошибка обновления фильма:', error);
-        throw error; // Пробрасываем ошибку дальше для обработки в контроллере
-    }
-};
-
-const deleteMovieById = async (id) => {
-    console.log(id);
-    try {
-        console.log('await');
-        const result = await pool.query('DELETE FROM movies WHERE id = \$1', [id]);
-        console.log('afterawait');
-        console.log(result);
-        return true;
-    } catch (err) {
-        console.error(err);
-        throw new Error('Ошибка сервера'); // Генерируем ошибку для обработки в контроллере
-    }
+    const values = [title, description, image, trailerid, position, id];
+    
+    const result = await pool.query(query, values);
+    return result.rows[0];
 };
 
 const updateMoviePosition = async (movieId, newPosition) => {
@@ -178,10 +200,11 @@ module.exports = {
     getAllUsersFromDB,
     getAllMovies,
     getMovieById,
+    deleteMovieById,
     nicknameExists,
+    createMovie,
     updateMovie,
     updateMoviePosition,
-    deleteMovieById,
     getLevelById,
     pool,
 };

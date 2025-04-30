@@ -8,6 +8,7 @@ const ProfilePage = () => {
     const { showNotification } = useNotification();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState(null);
     const [levelInfo, setLevelInfo] = useState(null);
     const [loadingLevel, setLoadingLevel] = useState(false);
@@ -36,35 +37,48 @@ const ProfilePage = () => {
     useEffect(() => {
       const fetchProfile = async () => {
         try {
+          setLoading(true);
           const response = await fetch('http://localhost:3000/api/users/me', {
               headers: {
                   'Authorization': `Bearer ${localStorage.getItem('token')}`,
               }
           });
+
+          console.log('Response status:', response.status);
+          
           if (!response.ok) {
               throw new Error('Ошибка авторизации');
           }
           const data = await response.json();
+          console.log('Received data:', data); // Логируем полученные данные
+                
           if (data.success) {
-            const userData = {
+            const formattedUser = {
                 ...data.user,
                 credits: Number(data.user.credits) || 0
             };
-            setUserData(userData);
+            setUserData(formattedUser);
             
-            // Загружаем информацию об уровне, если он есть
-            if (userData.level) {
-                await fetchLevelInfo(userData.level);
+            if (formattedUser.level) {
+                await fetchLevelInfo(formattedUser.level);
             }
           }
         } catch (error) {
-            showNotification(error.message, 'error');
-            logout();
+          console.error('Profile fetch error:', error); // Логируем ошибку
+          setError(error.message);
+          showNotification(error.message, 'error');
+          logout();
+        } finally {
+          setLoading(false);
         }
       };
   
-      if (user) fetchProfile();
-    }, [user]);
+      if (user) {
+        fetchProfile();
+      } else {
+        navigate('/login');
+      }
+    }, [user, navigate, logout, showNotification]);
 
     // Если пользователь не авторизован, просто ничего не рендерим
     if (!user) {
