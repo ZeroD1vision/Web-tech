@@ -3,8 +3,12 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    background: #0a0a0a;
+    background: rgba(19, 19, 19, 0.85); /* Добавляем прозрачность */
+    backdrop-filter: blur(8px); /* Эффект матового стекла */
+    border: 1px solid rgba(197, 166, 66, 0.1); /* Тонкая золотая рамка */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Глубокая тень */
     min-height: 100vh;
+    transition: all 0.5s ease;
 }
 
 h1 {
@@ -50,7 +54,7 @@ h1::after {
 .movie-card {
     background: #101401;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(255, 255, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(161, 161, 16, 0.3);
     transition: all 0.3s ease;
     overflow: hidden;
     cursor: pointer;
@@ -59,10 +63,11 @@ h1::after {
 .movie-card:hover {
     transform: translateY(-5px);
     border-color: rgba(220, 195, 53, 0.786);
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.1);
+    box-shadow: 0 8px 25px rgba(255, 217, 0, 0.1);
 }
 
-.movie-card::before {
+/* Эффект подсветки при наведении */
+.movie-card:hover::after {
     content: '';
     position: absolute;
     top: -2px;
@@ -70,9 +75,16 @@ h1::after {
     right: -2px;
     bottom: -2px;
     border-radius: 14px;
-    background: linear-gradient(45deg, #ffd70033, transparent 50%);
+    background: linear-gradient(
+      45deg, 
+      rgba(15, 14, 5, 0.658), 
+      rgba(39, 34, 5, 0.941),
+      rgba(70, 66, 15, 0.941),
+      transparent 90%
+    );
     z-index: -1;
-}
+    animation: 3s ease-in-out infinite;
+  }
 
 .movie-poster {
     height: 400px;
@@ -115,6 +127,13 @@ h1::after {
     width: 100px;
     height: 1px;
     background: linear-gradient(90deg, #ffd700, transparent);
+    animation: card-glow 3s infinite
+}
+
+@keyframes card-glow {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
 }
 
 .description {
@@ -126,22 +145,57 @@ h1::after {
 /* Кнопка трейлера */
 .trailer-btn {
     position: relative;
-    background: linear-gradient(45deg, #211c02, #c5a642);
-    color: #181c0e !important;
-    font-weight: 800;
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    color: #b39a4b !important;
     border: none;
     padding: 8px 15px;
     border-radius: 16px;
-    /*text-transform: uppercase;*/
-    font-size: 0.9rem;
-    letter-spacing: 0.8px;
-    transition: all 0.3s ease-in;
+    font-weight: 650;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.trailer-btn:hover {
+/* Плавное фоновое свечение */
+.trailer-btn::before {
+    border-radius: 16px;
+    content: '';
+    position: absolute;
+    top: 0.2px;
+    left: 1px;
+    width: 100%;
+    height: 102%;
     background: linear-gradient(45deg, #c5a642, #ffd700);
-    box-shadow: 0 2px 12px rgba(255, 215, 0, 0.3);
-    transform: scale(1.2);
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+/* Эффекты при наведении */
+.trailer-btn:hover {
+    transform: translateY(-2px);
+}
+
+.trailer-btn:hover::before {
+    opacity: 0.3;
+}
+
+/* Плавная анимация границы */
+.trailer-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.trailer-btn:hover::after {
+    border-radius: 16px;
+    opacity: 1;
 }
 
 /* Кнопки администратора*/
@@ -170,7 +224,7 @@ h1::after {
 }
 
 .admin-actions-overlay button:hover {
-    background: rgba(4, 3, 3, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     border-color: #ffd700;
     box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
 }
@@ -185,11 +239,6 @@ h1::after {
     height: 40px;
     stroke: #f74d4d;
     stroke-width: 1.5;
-}
-
-/* Для лучшей видимости на светлых фонах */
-.movie-poster:hover .admin-actions-overlay button {
-    background: rgba(255, 255, 255, 0.95);
 }
 
 /* Добавить фильм */
@@ -213,7 +262,7 @@ h1::after {
 
 /* Анимации */
 @keyframes gradient-shine {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
 }

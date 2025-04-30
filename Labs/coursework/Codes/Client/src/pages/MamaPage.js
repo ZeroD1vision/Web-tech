@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { fetchMovies } from '../services/movieService';
 import MovieCard from '../components/MovieCard';
 import SearchBar from '../components/SearchBar';
-
+import './MovieList/MovieListPage.css';
 const MamaPage = () => {
     const [ movies, setMovies ] = useState([]);
     const [ filteredMovies, setFilteredMovies ] = useState([]);

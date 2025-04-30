@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware для проверки JWT
 const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
+    console.log('Полученный токен:', token);
     
     if(!token) return res.status(401).json({ message: 'Требуется авторизация' });
 
@@ -29,8 +30,11 @@ const authMiddleware = (req, res, next) => {
 
 // Middleware для администарторов
 const isAdmin = (req, res, next) => {
-    if(req.user.role !== 'admin') {
-        return res.status(403).json({ success: false, message: 'Доступ запрещен' });
+    if (!req.user?.role || req.user.role !== 'admin') {
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Доступ запрещен. Требуются права администратора' 
+        });
     }
     next();
 };
@@ -38,11 +42,13 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // Настройка CORS для безопасного взаимодействия с клиентом
 app.use(cors({
-    origin: 'http://localhost:3001', // Адрес клиентского приложения
+    origin: 'http://localhost:3001',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Authorization'],
     credentials: true
 }));
+
 app.use(express.json());
 
 // Аутентификация
@@ -78,6 +84,54 @@ app.get('/api/movies', async (req, res) => {
             success: false,
             data: 'Internal server error'
         });
+    }
+});
+
+// Получение фильма по ID
+app.get('/api/movies/:id', async (req, res) => {
+    try {
+        const movie = await db.getMovieById(req.params.id);
+        res.json({ success: true, movie });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// Создание фильма (только для админов)
+app.post('/api/movies', authMiddleware, isAdmin, async (req, res) => {
+    try {
+        const newMovie = await db.createMovie(req.body);
+        res.status(201).json({ success: true, movie: newMovie });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+});
+
+// Обновление фильма (только для админов)
+app.put('/api/movies/:id', authMiddleware, isAdmin, async (req, res) => {
+    console.log('User role:', req.user.role);
+    try {
+        const updatedMovie = await db.updateMovie(req.params.id, req.body);
+        res.json({ 
+            success: true, 
+            movie: updatedMovie 
+        });
+    } catch (error) {
+        res.status(400).json({ 
+            success: false, 
+            message: error.message 
+        });
+    }
+});
+
+// Удаление фильма (только для админов)
+//Добавить модальное окно 
+app.delete('/api/movies/:id', authMiddleware, isAdmin, async (req, res) => {
+    try {
+        await db.deleteMovieById(req.params.id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
     }
 });
 
