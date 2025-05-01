@@ -53,33 +53,25 @@ export const createMovie = async (movieData) => {
     if (!token) throw new Error('Требуется авторизация');
     console.log('Используем токен:', token);
 
-    try {
-        const response = await fetch('http://localhost:3000/api/movies', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(movieData)
-        });
+    const response = await fetch('http://localhost:3000/api/movies', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(movieData)
+    });
 
-        console.log('Response status:', response.status);
-        
-        if (response.status === 403) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Доступ запрещен');
-        }
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Ошибка сервера');
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error in createMovie:', error);
-        throw error;
+    if (response.status === 403) {
+        throw new Error('Доступ запрещен. Требуются права администратора');
     }
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Ошибка создания фильма');
+    }
+    
+    return response.json();
 }
 
 export const updateMovie = async (id, movieData) => {

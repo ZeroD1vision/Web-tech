@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
-import { getMovieById } from '../../services/movieService';
+import { getMovieById, deleteMovie } from '../../services/movieService';
 import './MoviePage.css';
 
 const MoviePage = () => {
@@ -11,20 +11,53 @@ const MoviePage = () => {
     const { showNotification } = useNotification();
     const [movie, setMovie] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
-
+    const navigate = useNavigate();
+    
     useEffect(() => {
         const loadMovie = async () => {
             try {
                 const data = await getMovieById(id);
-                setMovie(data);
+                // Преобразование данных из БД
+                const transformedData = {
+                    ...data,
+                    // Разделяем жанры из строки в массив
+                    genres: data.genres ? data.genres.split(', ') : [],
+                    // Преобразуем рейтинг в число
+                    rating: parseFloat(data.rating) || 0
+                };
+                
+                setMovie(transformedData);
             } catch (error) {
                 showNotification('Ошибка загрузки фильма', 'error');
+                navigate('/movies');
             } finally {
                 setLoading(false);
             }
         };
         loadMovie();
     }, [id]);
+
+    const handleDelete = async (id) => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showNotification('Требуется авторизация', 'error');
+            return;
+        }
+
+        if(!window.confirm('Вы уверены, что хотите удалить этот фильм?')) return;
+
+        try {
+            await deleteMovie(id);
+            showNotification('Фильм успешно удалён', 'success');
+            navigate('/movies');
+        } catch (error) {
+            showNotification('Ошибка при удалении фильма', 'error');
+        }
+    };
+    
+    const handleEdit = async (id) => {
+        navigate(`/movies/${id}/edit`);
+    }
 
     if(loading) {
         return (
@@ -51,7 +84,7 @@ const MoviePage = () => {
                 <div className="movie-poster-section">
                     <div className="movie-poster-wrapper">
                         <img 
-                            src={movie.image} 
+                            src={`http://localhost:3000/${movie.image}`} 
                             alt={movie.title} 
                             className="movie-poster"
                             onError={(e) => {
@@ -64,15 +97,26 @@ const MoviePage = () => {
                     <div className="movie-quick-info">
                         <div className="info-block">
                             <span className="info-label">Год выхода</span>
-                            <span className="info-value">2023</span>
+                            <span className="info-value">{movie.release_year}</span>
                         </div>
                         <div className="info-block">
                             <span className="info-label">Рейтинг</span>
-                            <span className="info-value rating">8.9/10</span>
+                            <span className="info-value rating">
+                                {movie.rating?.toFixed(1) || 'Нет оценок'}/10
+                                <small>({movie.ratings_count} оценок)</small>
+                            </span>
                         </div>
                         <div className="info-block">
                             <span className="info-label">Жанр</span>
-                            <span className="info-value">Фантастика</span>
+                            <div className="genres-list">
+                                {movie.genres
+                                    .filter((genre, index, self) => self.indexOf(genre) === index) // Убираем дубли
+                                    .map((genre) => (
+                                        <span key={genre} className="genre-tag"> {/* Используем имя как ключ */}
+                                          {genre}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -83,24 +127,32 @@ const MoviePage = () => {
                         <h2 className="section-title">Описание</h2>
                         <p className="movie-description">{movie.description}</p>
                     </div>
-
+                    {/* Секция с трейлером */}
                     <div className="trailer-section">
                         <h2 className="section-title">Трейлер</h2>
-                        <div className="trailer-embed">
-                            <iframe
-                                src={`https://rutube.ru/embed/${movie.trailerid}`}
-                                title="Трейлер"
-                                allowFullScreen
-                            />
-                        </div>
-                        <a
-                            href={`https://rutube.ru/video/${movie.trailerid}`}
-                            className="trailer-btn"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Смотреть на Rutube
-                        </a>
+                        {movie.trailerid ? (
+                            <>
+                                <div className="trailer-embed">
+                                    <iframe
+                                        src={`https://rutube.ru/embed/${movie.trailerid}?noAds=true`}
+                                        title="Трейлер"
+                                        allowFullScreen
+                                    />
+                                </div>
+                                <a
+                                    href={`https://rutube.ru/video/${movie.trailerid}`}
+                                    className="trailer-btn"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Смотреть на Rutube
+                                </a>
+                            </>
+                        ) : (
+                            <div className="no-trailer">
+                                Трейлер недоступен
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -109,13 +161,13 @@ const MoviePage = () => {
                     <div className="admin-panel">
                         <button 
                             className="edit-btn"
-                            onClick={() => {/* Логика редактирования */}}
+                            onClick={() => handleEdit(id)}
                         >
                             Редактировать
                         </button>
                         <button 
                             className="delete-btn"
-                            onClick={() => {/* Логика удаления */}}
+                            onClick={() => handleDelete(id)}
                         >
                             Удалить
                         </button>
