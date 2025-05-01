@@ -35,6 +35,7 @@ const getMovieById = async (id) => {
           m.*,
           COALESCE(AVG(r.rating), 0) AS rating,
           COUNT(r.id) AS ratings_count,
+          ARRAY_AGG(DISTINCT g.id) FILTER (WHERE g.id IS NOT NULL) AS genre_ids,
           STRING_AGG(DISTINCT g.name, ', ') AS genres
         FROM movies m
         LEFT JOIN ratings r ON m.id = r.movie_id
@@ -43,7 +44,10 @@ const getMovieById = async (id) => {
         WHERE m.id = $1
         GROUP BY m.id
       `, [id]);
-    return res.rows[0];
+      return {
+        ...res.rows[0],
+        release_year: parseInt(res.rows[0].release_year) || null
+    };
 };
 
 const deleteMovieById = async (id) => {
@@ -61,6 +65,26 @@ const deleteMovieById = async (id) => {
     } catch (error) {
         console.error(`Ошибка удаления фильма ID ${id}:`, error);
         throw error;
+    }
+};
+
+// Получение всех жанров
+const getAllGenres = async () => {
+    const res = await pool.query('SELECT * FROM genres');
+    return res.rows;
+};
+
+// Обновление жанров фильма
+const updateMovieGenres = async (movieId, genreIds) => {
+    // Удаляем старые жанры
+    await pool.query('DELETE FROM movie_genres WHERE movie_id = $1', [movieId]);
+    
+    // Добавляем новые
+    for (const genreId of genreIds) {
+        await pool.query(
+            'INSERT INTO movie_genres (movie_id, genre_id) VALUES ($1, $2)',
+            [movieId, genreId]
+        );
     }
 };
 
@@ -127,11 +151,24 @@ const getAllUsersFromDB = async () => {
 const createMovie = async (movieData) => {
     const { title, description, image, trailerid, position } = movieData;
     const query = `
-        INSERT INTO movies (title, description, image, trailerid, position)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO movies 
+            (title, 
+            description, 
+            image, 
+            trailerid, 
+            position,
+            release_year = $6)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
     `;
-    const values = [title, description, image, trailerid, position || 0];
+    const values = [
+        title, 
+        description, 
+        image, 
+        trailerid, 
+        position || 0,
+        release_year ? parseInt(release_year) : null
+    ];
 
     try {
         const result = await pool.query(query, values);
@@ -143,18 +180,26 @@ const createMovie = async (movieData) => {
 }
 
 const updateMovie = async (id, movieData) => {
-    const { title, description, image, trailerid, position } = movieData;
+    const { title, description, image, trailerid, position, release_year } = movieData;
     const query = `
         UPDATE movies
         SET title = $1, 
             description = $2, 
             image = $3, 
             trailerid = $4, 
-            position = $5
-        WHERE id = $6
+            position = $5,
+            release_year = $6
+        WHERE id = $7
         RETURNING *
     `;
-    const values = [title, description, image, trailerid, position, id];
+    const values = [
+        title, 
+        description, 
+        image, 
+        trailerid, 
+        position || 0, 
+        release_year ? parseInt(release_year) : null,
+        id];
     
     const result = await pool.query(query, values);
     return result.rows[0];
@@ -210,6 +255,8 @@ module.exports = {
     getAllMovies,
     getMovieById,
     deleteMovieById,
+    getAllGenres,
+    updateMovieGenres,
     nicknameExists,
     createMovie,
     updateMovie,
