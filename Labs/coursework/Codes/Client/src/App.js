@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navigation from './pages/Navigation/Navigation';
 import { NotificationProvider } from './context/NotificationContext';
@@ -11,7 +11,7 @@ import AboutPage from './pages/About/AboutPage';
 import LoginForm from './pages/Auth/LoginForm';
 import RegistrationForm from './pages/Auth/RegistrationForm';
 import MovieFormPage from './pages/MovieForm/MovieFormPage';
-// import MoviePage from './pages/MoviePage/MoviePage';
+import MoviePage from './pages/MoviePage/MoviePage';
 
 import './App.css';
 
@@ -35,6 +35,40 @@ const useScrollHandler = () => {
   }, []);
 };
 
+const PageTitle = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    switch (location.pathname) {
+      case '/':
+        document.title = 'Главная страница';
+        break;
+      case '/movies':
+        document.title = 'Список фильмов';
+        break;
+      case '/premieres':
+        document.title = 'Сейчас в кадре';
+        break;
+      case '/profile':
+        document.title = 'Профиль';
+        break;
+      case '/about':
+        document.title = 'О нас';
+        break;
+      case '/login':
+        document.title = 'Вход';
+        break;
+      case '/register':
+        document.title = 'Регистрация';
+        break;
+      default:
+        document.title = 'Celeston Theatre';
+    }
+  }, [location]);
+
+  return null; // Этот компонент ничего не рендерит
+};
+
 
 function App() {
   useScrollHandler();
@@ -45,6 +79,7 @@ function App() {
       <NotificationProvider>
         <AuthProvider>
           <Router>
+          <PageTitle />
             {/* Навигационное меню с CSS-классами */}
             <nav className="app-nav">
               <Link to="/" className="nav-logo">
@@ -72,7 +107,7 @@ function App() {
               <Route path="/login" element={<LoginForm />} />
               <Route path="/register" element={<RegistrationForm />} />
               <Route path="/about" element={<AboutPage />} />
-              {/* <Route path="/movies/:id" element={<MoviePage />} /> */}
+              <Route path="/movies/:id" element={<MoviePage />} />
               {/*Для админов*/}
               <Route path="/movies/new" element={<MovieFormPage />} />
               <Route path="/movies/:id/edit" element={<MovieFormPage />} />

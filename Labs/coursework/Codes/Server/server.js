@@ -82,18 +82,50 @@ app.get('/api/movies', async (req, res) => {
         console.error('Database Error: ', error);
         res.status(500).json({
             success: false,
-            data: 'Internal server error'
+            data: 'Внутренняя ошибка сервера'
         });
     }
+});
+
+app.get('/api/movies/search', async (req, res) => {
+    try {
+        const { search, genre, yearFrom, yearTo } = req.query;
+
+        let query = `
+            SELECT m.*,
+            `;
+    } catch (error) {}
 });
 
 // Получение фильма по ID
 app.get('/api/movies/:id', async (req, res) => {
     try {
         const movie = await db.getMovieById(req.params.id);
-        res.json({ success: true, movie });
+        if(!movie) {
+            return res.status(404).json({
+                success: false,
+                message: 'Фильм не найден'
+            });
+        }
+
+        const movieWithDetails = {
+            ...movie,
+            year: new Date(movie.release_year).getFullYear(),
+            rating: movie.rating || 0,
+            genre: movie.genre || 'Не указан',
+            trailerid: movie.trailerid
+        };
+
+        res.json({
+            success: true, 
+            movie: movieWithDetails 
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+        console.error('Ошибка получения фильма:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Внутренняя ошибка сервера'
+        });
     }
 });
 

@@ -30,10 +30,19 @@ const getAllMovies = async () => {
 
 // Функция для получения фильма по ID
 const getMovieById = async (id) => {
-    const res = await pool.query(
-        'SELECT id, title, description, image, trailerid, position FROM movies WHERE id = $1', 
-        [id]
-    );
+    const res = await pool.query(`
+        SELECT 
+          m.*,
+          COALESCE(AVG(r.rating), 0) AS rating,
+          COUNT(r.id) AS ratings_count,
+          STRING_AGG(DISTINCT g.name, ', ') AS genres
+        FROM movies m
+        LEFT JOIN ratings r ON m.id = r.movie_id
+        LEFT JOIN movie_genres mg ON m.id = mg.movie_id
+        LEFT JOIN genres g ON mg.genre_id = g.id
+        WHERE m.id = $1
+        GROUP BY m.id
+      `, [id]);
     return res.rows[0];
 };
 

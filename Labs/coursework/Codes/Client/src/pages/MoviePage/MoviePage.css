@@ -41,6 +41,42 @@
     color: #ffd700;
 }
 
+.genres-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .genre-tag {
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+  }
+  
+  .rating small {
+    font-size: 0.8em;
+    opacity: 0.8;
+    margin-left: 8px;
+  }
+  
+  .trailer-embed {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+  }
+  
+  .trailer-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
 /* Основной контент */
 .movie-content {
     display: grid;
@@ -63,6 +99,10 @@
     width: 100%;
     height: 450px;
     object-fit: cover;
+}
+
+.movie-poster-wrapper img {
+    display: block; /* Убеждаемся, что изображение является блочным элементом */
 }
 
 .movie-quick-info {

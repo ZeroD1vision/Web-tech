@@ -27,12 +27,14 @@ const LoginForm = () => {
             if (!response.ok) throw new Error(data.message || 'Ошибка входа');
 
             showNotification('Успешный вход!', 'success');
+
             login(data.token, {
                 id: data.user.id,
                 username: data.user.username,
                 role: data.user.role,
                 nickname: data.user.nickname
             });
+            
             navigate('/profile');
         } catch (err) {
             showNotification(err.message || 'Ошибка подключения к серверу', 'error');
