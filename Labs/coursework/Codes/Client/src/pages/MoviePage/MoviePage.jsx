@@ -74,7 +74,7 @@ const MoviePage = () => {
             <div className="movie-header">
                 <h1 className="gradient-title">{movie.title}</h1>
                 <Link to="/movies" className="back-button">
-                    ← К списку фильмов
+                    К списку фильмов
                 </Link>
             </div>
 
@@ -160,13 +160,13 @@ const MoviePage = () => {
                 {user?.role === 'admin' && (
                     <div className="admin-panel">
                         <button 
-                            className="edit-btn"
+                            className="edit-form-btn"
                             onClick={() => handleEdit(id)}
                         >
                             Редактировать
                         </button>
                         <button 
-                            className="delete-btn"
+                            className="delete-form-btn"
                             onClick={() => handleDelete(id)}
                         >
                             Удалить

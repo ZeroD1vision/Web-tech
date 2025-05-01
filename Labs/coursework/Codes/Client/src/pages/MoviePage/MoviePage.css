@@ -29,16 +29,50 @@
 
 .back-button {
     position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #c5a642;
+    display: inline-flex;
+    left: 5px;
+    top: 1.3rem;
+    padding: 12px 50px;
+    font-size: 1.1rem;
+    background: linear-gradient(45deg, #1a1a1a, #000);
+    color: #ffd700 !important;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
     text-decoration: none;
-    transition: color 0.3s ease;
+    overflow: hidden;
 }
 
+/* Стрелка */
+.back-button::before {
+    content: '←';
+    position: absolute;
+    left: 20px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
+}
+
+/* Текст */
+.back-button span {
+    transition: transform 0.3s ease;
+}
+
+/* Анимация при наведении */
 .back-button:hover {
-    color: #ffd700;
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
+    padding-left: 55px; /* Увеличиваем отступ при наведении */
+}
+
+.back-button:hover::before {
+    left: 15px; /* Смещаем стрелку влево */
+    opacity: 0.8;
+}
+
+.back-button:hover span {
+    transform: translateX(-5px); /* Небольшой сдвиг текста */
 }
 
 .genres-list {
@@ -49,7 +83,7 @@
   
   .genre-tag {
     background: linear-gradient(45deg, #3e3610, #2f2609);
-    color: white;
+    color: rgb(200, 177, 128);
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 0.9em;
@@ -76,6 +110,119 @@
     height: 100%;
     border: none;
   }
+
+  /* Кнопки в карточке фильма */
+  .admin-panel {
+    position: absolute;
+    top: 13px;
+    right: 20px;
+    display: flex;
+    gap: 1.2rem;
+    z-index: 10;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.edit-form-btn, .delete-form-btn {
+    padding: 0.9rem 1.2rem;
+    border: none;
+    border-radius: 26px;
+    font-weight: 700;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+}
+
+/* Общие эффекты для обеих кнопок */
+.edit-form-btn::before,
+.delete-form-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -150%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.047), 
+        transparent);
+    transform: rotate(45deg);
+    transition: 0.6s;
+}
+
+/* Кнопка редактирования */
+.edit-form-btn {
+    background: linear-gradient(45deg, 
+        #1a1a1a, 
+        #000);
+    color: #ffd700 !important;
+    color: #ffe08a;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+}
+
+.edit-form-btn:hover {
+    background: linear-gradient(135deg, 
+        rgba(170, 135, 25, 0.95), 
+        rgba(110, 85, 10, 0.95));
+    color: #e3d085 !important;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.25);
+    transform: translateY(-2px);
+    border: 1px solid rgba(86, 71, 11, 0.933);
+}
+
+/* Кнопка удаления */
+.delete-form-btn {
+    background: linear-gradient(135deg, 
+        rgba(78, 8, 8, 0.9), 
+        rgba(201, 56, 56, 0.9));
+    color: #ffa8a8;
+}
+
+.delete-form-btn:hover {
+    background: linear-gradient(135deg,
+        rgba(100, 15, 15, 0.95),
+        rgba(160, 30, 30, 0.95));
+    box-shadow: 0 4px 20px rgba(255, 77, 77, 0.25);
+    transform: translateY(-2px);
+}
+
+.edit-form-btn::before,
+.delete-form-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.15), 
+        transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s ease-out;
+    opacity: 0;
+}
+
+.edit-form-btn:hover::before,
+.delete-form-btn:hover::before {
+    left: 100%;
+    opacity: 1;
+    transition: all 0.3s linear;
+}
+
+/* Возврат в исходное состояние при уходе курсора */
+.edit-form-btn,
+.delete-form-btn {
+    transition: all 0.3s ease;
+}
+
+.edit-form-btn:not(:hover)::before,
+.delete-form-btn:not(:hover)::before {
+    transition: all 0.5s ease-out !important;
+}
 
 /* Основной контент */
 .movie-content {

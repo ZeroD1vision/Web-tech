@@ -59,7 +59,10 @@ export const createMovie = async (movieData) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(movieData)
+        body: JSON.stringify({
+            ...movieData,
+            genres: selectedGenres // Добавить выбранные жанры
+        })
     });
 
     if (response.status === 403) {

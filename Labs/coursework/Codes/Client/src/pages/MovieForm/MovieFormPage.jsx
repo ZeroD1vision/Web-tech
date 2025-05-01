@@ -1,34 +1,96 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
 import { createMovie, updateMovie, getMovieById } from '../../services/movieService';
+import './MovieFormPage.css';
+
+const validateForm = (data, genres) => {
+    const errors = {};
+    const currentYear = new Date().getFullYear();
+
+    if (!data.title.trim()) errors.title = 'Название обязательно';
+    if (!data.description.trim()) errors.description = 'Описание обязательно';
+    if (!data.release_year || data.release_year < 1888 || data.release_year > currentYear + 5) {
+        errors.release_year = `Год должен быть от 1888 до ${currentYear + 5}`;
+    }
+    // Исправить урл изображения !!!!!!!!!!!!!
+    // if (!data.image.match(/([/|.|\w|\s|-])*\.(?:jpg|gif|png)/)) {
+    //   errors.image = 'Некорректный URL изображения';
+    // }
+    if (!data.trailerid.trim()) errors.trailerid = 'Идентификатор трейлера обязателен';
+    if (genres.length === 0) errors.genres = 'Выберите хотя бы один жанр';
+
+    return errors;
+};
 
 const MovieFormPage = () => {
     const { user } = useAuth();
     const { id } = useParams();
     const navigate = useNavigate();
     const { showNotification } = useNotification();
+
     const [ formData, setFormData ] = useState({
         title: '',
         description: '',
         image: '',
         trailerid: '',
-        position: 0
+        position: 0,
+        release_year: ''
     });
+
+    const [selectedGenres, setSelectedGenres] = useState([]);
+    const [genresList, setGenresList] = useState([]);
+
+    
+    const [errors, setErrors] = useState({});
+    const firstErrorRef = useRef(null);
+
+    const scrollToError = () => {
+        if (firstErrorRef.current) {
+          firstErrorRef.current.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      };
+    
+    useEffect(() => {
+        // Загрузка списка жанров
+        const fetchGenres = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/genres');
+                const data = await response.json();
+                if(data.success) {
+                    setGenresList(data.genres);
+                }
+            } catch (error) {
+                showNotification('Ошибка загрузки жанров', 'error');
+            }
+        };
+        fetchGenres();
+    }, []);
 
     useEffect(() => {
         if(id) {
             const fetchMovie = async () => {
                 try {
                     const movie = await getMovieById(id);
+                    console.log('Received movie data:', movie);
+
                     setFormData({
                         title: movie.title || '',
                         description: movie.description || '',
                         image: movie.image || '',
                         trailerid: movie.trailerid || '',
-                        position: movie.position || 0
+                        position: movie.position || 0,
+                        release_year: movie.release_year || '' // Оставляем как число
                     });
+                    
+                    // Установка выбранных жанров
+                    if(movie.genre_ids) {
+                        setSelectedGenres(movie.genre_ids.filter(id => id !== null));
+                    }
                 } catch (error) {
                     showNotification('Ошибка загрузки фильма', 'error');
                     navigate('/movies');
@@ -47,25 +109,84 @@ const MovieFormPage = () => {
                 throw new Error('Недостаточно прав для выполнения операции');
             }
 
+            const validationErrors = validateForm(formData, selectedGenres);
+            if (Object.keys(validationErrors).length > 0) {
+                setErrors(validationErrors);
+                scrollToError();
+                return;
+            }
+
+            const payload = {
+                ...formData,
+                genres: selectedGenres || [],
+                release_year: formData.release_year 
+                ? parseInt(formData.release_year) // Отправляем как число
+                : null // Преобразуем год в дату
+            };
+
+            console.log('Submit Movie data:', payload);
+    
             if (id) {
-                await updateMovie(id, formData);
+                await updateMovie(id, payload);
                 showNotification('Фильм успешно обновлен', 'success');
             } else {
-                await createMovie(formData);
+                await createMovie(payload);
                 showNotification('Фильм успешно создан', 'success');
             }
             navigate('/movies');
+            setErrors({});
         } catch (error) {
-            console.error('Submission error:', error);
-            showNotification(error.message, 'error');
+            if (error.response?.data?.errors) {
+                const serverErrors = error.response.data.errors.reduce((acc, err) => {
+                    acc[err.path] = err.msg;
+                    return acc;
+                }, {});
+                setErrors(serverErrors);
+                scrollToError();
+            } else {
+                showNotification(error.message, 'error');
+            }
         }
+    };
+
+    // Обновленный рендеринг полей с обработкой ошибок
+    const renderField = (name, label, type = 'text', extraProps = {}) => {
+        const hasError = !!errors[name];
+        return (
+            <div 
+              className={`form-group ${hasError ? 'invalid' : ''}`} 
+              ref={hasError && !firstErrorRef.current ? (el => firstErrorRef.current = el) : null}
+            >
+              <label>{label}:</label>
+              <input
+                type={type}
+                value={formData[name]}
+                onChange={(e) => {
+                  setFormData({...formData, [name]: e.target.value});
+                  setErrors(prev => ({...prev, [name]: ''}));
+                }}
+                {...extraProps}
+              />
+              {errors[name] && <span className="error-message">{errors[name]}</span>}
+            </div>
+        );
     };
 
     return (
         <div className="movie-form-container">
             <h2>{id ? 'Редактирование фильма' : 'Создание нового фильма'}</h2>
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
+                {renderField('title', 'Название', 'text', { required: true })}
+                {renderField('description', 'Описание', 'textarea')}
+                {renderField('release_year', 'Год выпуска', 'number', {
+                  min: 1888,
+                  max: new Date().getFullYear() + 5
+                })}
+                {/* {renderField('image', 'Изображение')} */}
+                {renderField('trailerid', 'Идентификатор трейлера')}
+                {renderField('position', 'Позиция', 'number', { min: 0 })}
+{/* 
+                    <div className="form-group">
                     <label>Название:</label>
                     <input
                         type="text"
@@ -85,6 +206,20 @@ const MovieFormPage = () => {
                 </div>
 
                 <div className="form-group">
+                    <label>Год выпуска:</label>
+                    <input
+                        type="number"
+                        value={formData.release_year || ''}
+                        onChange={(e) => setFormData({
+                            ...formData,
+                            release_year: e.target.value ? parseInt(e.target.value) : ''
+                        })}
+                        min="1900"
+                        max={new Date().getFullYear()}
+                    />
+                </div>
+
+                <div className="form-group">
                     <label>Изображение:</label>
                     <input
                         type="text"
@@ -92,8 +227,33 @@ const MovieFormPage = () => {
                         onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                         required
                     />
+                </div> 
+*/}
+                
+                {/* Секция выбора жанров */}
+                <div className="form-group">
+                    <label>Жанры:</label>
+                    <div className="genres-select">
+                        {genresList.map(genre => (
+                            <label key={genre.id} className="genre-checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedGenres.includes(genre.id)}
+                                    onChange={(e) => {
+                                        const newSelection = e.target.checked
+                                            ? [...selectedGenres, genre.id]
+                                            : selectedGenres.filter(id => id !== genre.id);
+                                        setSelectedGenres(newSelection);
+                                        setErrors(prev => ({...prev, genres: ''}));
+                                    }}
+                                />
+                                <span>{genre.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                    {errors.genres && <span className="error-message">{errors.genres}</span>}
                 </div>
-
+{/*
                 <div className="form-group">
                     <label>Идентификатор трейлера:</label>
                     <input
@@ -116,9 +276,19 @@ const MovieFormPage = () => {
                             min="0"
                         />
                 </div>
-                
-                <button type="submit">Сохранить</button>
-                <button type="button" onClick={() => navigate('/movies')}>Отмена</button>
+*/}
+                <div className="form-actions">
+                    <button type="submit" className="btn-save">
+                        {id ? 'Сохранить изменения' : 'Создать фильм'}
+                    </button>
+                    <button 
+                        type="button" 
+                        className="btn-cancel"
+                        onClick={() => navigate('/movies')}
+                    >
+                        Отмена
+                    </button>
+                </div>
             </form>
         </div>
     );
