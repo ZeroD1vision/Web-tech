@@ -2,8 +2,60 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 
-const JWT_SECRET = process.env.JWT_SECRET || '911onelove911';
+const JWT_SECRET = process.env.JWT_SECRET || '911onelove9111';
 const SALT_ROUNDS = 10;
+
+const generateTokens = (user) => {
+    const accessToken = jwt.sign(
+        { 
+          id: user.id,
+          role: user.role,
+          username: user.username
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '15m' }
+      );
+    
+    const refreshToken = jwt.sign(
+        { id: user.id },
+        process.env.REFRESH_SECRET,
+        { expiresIn: '7d' }
+    );
+    
+    return { accessToken, refreshToken };
+};
+
+const refreshToken = async (req, res) => {
+    const { refreshToken } = req.body;
+    
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+        const user = await db.findUserById(decoded.id);
+        
+        if (!user) throw new Error('Пользователь не найден');
+        
+        const newTokens = generateTokens(user);
+        
+        res.json({
+            success: true,
+            ...newTokens
+        });
+        
+    } catch (error) {
+        res.status(401).json({ 
+            success: false,
+            message: 'Недействительный refresh токен' 
+        });
+    }
+};
+
+
+const logoutUser = async (req, res) => {
+    // Здесь можно добавить логику инвалидации токенов
+    res.clearCookie('refreshToken');
+    res.json({ success: true, message: 'Выход выполнен успешно' });
+};
+
 
 const registerUser = async (req, res) => {
     try {
@@ -16,26 +68,18 @@ const registerUser = async (req, res) => {
             password: hashedPassword
         });
         
-        const token = jwt.sign(
-            { 
-                id: user.id, 
-                username: user.username,
-                role: user.role
-            },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        );
+        const tokens = generateTokens(user);
 
         res.status(201).json({
             success: true,
-            token,
+            ...tokens,
             user: {
                 id: user.id,
                 username: user.username,
                 nickname: user.nickname,
                 role: user.role // Добавляем роль в ответ
             },
-            message: 'Регистрация прошла успешно!'
+            message: 'Теперь вы зарегестрированы!'
         });
     } catch (error) {
         res.status(400).json({
@@ -54,19 +98,11 @@ const loginUser = async (req, res) => {
             throw new Error('Неверные учетные данные');
         }
 
-        const token = jwt.sign(
-            { 
-                id: user.id, 
-                username: user.username,
-                role: user.role // Добавляем роль в токен
-            },
-            JWT_SECRET,
-            { expiresIn: '7d' }
-        );
+        const tokens = generateTokens(user);
 
         res.json({
             success: true,
-            token,
+            ...tokens,
             user: {
                 id: user.id,
                 username: user.username,
@@ -87,15 +123,25 @@ const getCurrentUser = async (req, res) => {
     try {
         const user = await db.findUserById(req.user.id);
         if (!user) throw new Error('Пользователь не найден');
+
+        let levelInfo = null;
+        if (user.level) {
+            levelInfo = await db.getLevelById(user.level);
+        }
         
         const userData = {
             id: user.id,
             username: user.username,
             nickname: user.nickname,
-            role: user.role, // Явно добавляем роль
+            role: user.role,
             credits: Number(user.credits),
             tickets: Number(user.tickets),
-            subscriptions: Number(user.subscriptions)
+            subscriptions: Number(user.subscriptions),
+            level: levelInfo ? {
+                id: levelInfo.id,
+                name: levelInfo.name,
+                description: levelInfo.description
+            } : null
         };
 
         res.json({
@@ -114,5 +160,8 @@ const getCurrentUser = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
-    getCurrentUser
+    getCurrentUser,
+    logoutUser,
+    refreshToken,
+    generateTokens
 };

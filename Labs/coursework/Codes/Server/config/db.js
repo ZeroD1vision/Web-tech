@@ -116,7 +116,15 @@ const addUserToDB = async (user) => {
 };
 
 const findUserById = async (id) => {
-    const result = await pool.query('SELECT * FROM users WHERE id = \$1', [id]);
+    const result = await pool.query(`
+    SELECT 
+      users.*,
+      user_levels.name as level_name,
+      user_levels.description as level_description
+    FROM users
+    LEFT JOIN user_levels ON users.level = user_levels.id
+    WHERE users.id = $1
+  `, [id]);
     return result.rows[0]; // Возвращаем первого найденного пользователя или undefined
 };
 
@@ -137,7 +145,17 @@ const nicknameExists = async (nickname) => {
 
 // Функция для поиска пользователя по имени в базе данных
 const findUserByUsernameInDB = async (username) => {
-    const query = 'SELECT id, username, password, nickname, role FROM users WHERE username = $1';
+    const query = `
+        SELECT 
+            id, 
+            username, 
+            password, 
+            nickname, 
+            role, 
+            level
+        FROM users 
+        WHERE username = $1
+    `;
     const result = await pool.query(query, [username]);
     return result.rows[0];
 };
@@ -228,14 +246,13 @@ const updateMoviePosition = async (movieId, newPosition) => {
 
 const getLevelById = async (levelId) => {
     try {
-        const result = await pool.query(
+        const { rows } = await pool.query(
             'SELECT * FROM user_levels WHERE id = $1',
             [levelId]
         );
-        return result.rows[0];
+        return rows[0] || null;
     } catch (error) {
-        console.error('Ошибка получения уровня:', error);
-        throw error;
+        throw new Error(`Ошибка получения уровня: ${error.message}`);
     }
 };
 
