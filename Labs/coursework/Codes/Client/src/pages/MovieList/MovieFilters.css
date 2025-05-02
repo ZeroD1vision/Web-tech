@@ -35,18 +35,6 @@
     -moz-appearance: none;
     appearance: none;
 }
-.filter-group-option:hover {
-    background-color: #2f0927;
-}
-.filter-group-option {
-    transition: 
-    background-color var(--transform-time-usual) ease-in-out,
-    border var(--transform-time-usual) ease-in-out,
-    opacity var(--transform-time-usual) ease-in-out,
-    max-height var(--transform-time-usual) ease-in-out,
-    font-size var(--transform-time-usual) ease-in-out;
-    max-height: 200px;
-}
 
 /* Кастомный плейсхолдер */
 .filter-group input::placeholder {
@@ -60,8 +48,12 @@
 
 .filter-group input:focus,
 .filter-group select:focus {
-    border-color: #c5a642;
-    box-shadow: 0 0 12px rgba(197, 166, 66, 0.2);
+    outline: none;
+    position: relative;
+}
+
+.filter-group:focus-within::after {
+    opacity: 1;
 }
 
 /* Специфические стили для фильтра по году */
@@ -76,17 +68,18 @@
     background: linear-gradient(45deg, #3e3610, #2f2609);
     color: #c5a642 !important;
     border: 1px solid rgba(197, 166, 66, 0.3) !important;
-    padding: 0.8rem 1.5rem;
+    padding: 0.9rem 1.5rem;
     border-radius: 30px;
     font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    top: -15px;
     overflow: hidden;
 }
 
 .reset-filters-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(197, 166, 66, 0.2);
+    box-shadow: 0 4px 0px rgba(197, 66, 66, 0.2);
     border-color: #c5a642 !important;
 }
 
@@ -116,10 +109,6 @@
     0% { box-shadow: 0 0 5px rgba(197, 166, 66, 0.3); }
     50% { box-shadow: 0 0 15px rgba(197, 166, 66, 0.5); }
     100% { box-shadow: 0 0 5px rgba(197, 166, 66, 0.3); }
-}
-
-.filter-group:focus-within {
-    animation: filter-glow 2s infinite;
 }
 
 
@@ -168,10 +157,6 @@ input[type="number"]::-webkit-inner-spin-button {
 .filter-group select:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(197, 166, 66, 0.5);
-}
-option:hover{
-	color:#fff;
-	background:rgb(153, 51, 51);
 }
 /* Стиль для выбранного элемента */
 .filter-group select option:checked {

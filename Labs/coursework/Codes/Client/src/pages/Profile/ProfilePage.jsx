@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import './ProfilePage.css';
+import axiosInstance from '../../api/axiosInstance';
 import { useNotification } from '../../context/NotificationContext';
+import './ProfilePage.css';
 
 const ProfilePage = () => {
     const { showNotification } = useNotification();
@@ -17,20 +18,30 @@ const ProfilePage = () => {
     const fetchLevelInfo = async (levelId) => {
       try {
           setLoadingLevel(true);
-          const response = await fetch(`http://localhost:3000/api/user-levels/${levelId}`);
+          const numericLevelId = Number(levelId);
+          const response = await axiosInstance.get(`/user-levels/${numericLevelId}`);
           
-          if (!response.ok) {
-              throw new Error('Ошибка загрузки информации об уровне');
-          }
-          
-          const data = await response.json();
-          if (data.success) {
-              setLevelInfo(data.level);
+          if (response.data.success) {
+            setLevelInfo(response.data.level);
           }
       } catch (error) {
-          showNotification(error.message, 'error');
+        console.error('Ошибка загрузки уровня:', error);
+        showNotification(error.response?.data?.message || 'Ошибка загрузки уровня', 'error');
       } finally {
           setLoadingLevel(false);
+      }
+    };
+
+
+    const handleLogout = async () => {
+      try {
+        await axiosInstance.post('/auth/logout');
+        logout();
+        showNotification('Вы успешно вышли из системы', 'success');
+        navigate('/login');
+      } catch (error) {
+        showNotification('Ошибка при выходе', 'error');
+        logout(); // Все равно очищаем токены на клиенте
       }
     };
 
@@ -38,52 +49,35 @@ const ProfilePage = () => {
       const fetchProfile = async () => {
         try {
           setLoading(true);
-          const response = await fetch('http://localhost:3000/api/users/me', {
-              headers: {
-                  'Authorization': `Bearer ${localStorage.getItem('token')}`,
-              }
-          });
-
-          console.log('Response status:', response.status);
-          
-          if (!response.ok) {
-              throw new Error('Ошибка авторизации');
+          const response = await axiosInstance.get('/users/me');
+          const userData = response.data.user;
+      
+          // Получаем ID уровня из объекта
+          if (userData.level?.id) {
+            const levelResponse = await axiosInstance.get(`/user-levels/${userData.level.id}`);
+            setLevelInfo(levelResponse.data.level);
           }
-          const data = await response.json();
-          console.log('Received data:', data); // Логируем полученные данные
-                
-          if (data.success) {
-            const formattedUser = {
-                ...data.user,
-                credits: Number(data.user.credits) || 0
-            };
-            setUserData(formattedUser);
-            
-            if (formattedUser.level) {
-                await fetchLevelInfo(formattedUser.level);
-            }
-          }
+      
+          setUserData(userData);
         } catch (error) {
-          console.error('Profile fetch error:', error); // Логируем ошибку
-          setError(error.message);
-          showNotification(error.message, 'error');
-          logout();
+          showNotification('Ошибка загрузки профиля', 'error');
         } finally {
-          setLoading(false);
+          setLoading(false); // Конец загрузки в любом случае
         }
       };
   
-      if (user) {
-        fetchProfile();
-      } else {
-        navigate('/login');
-      }
-    }, [user, navigate, logout, showNotification]);
+      if (user) fetchProfile();
+    }, [user]);
 
-    // Если пользователь не авторизован, просто ничего не рендерим
-    if (!user) {
-        return null; // Можно также вернуть загрузочный индикатор или сообщение
-    }
+  // Если пользователь не авторизован, просто ничего не рендерим
+  if (!user) {
+      return null; // Можно также вернуть загрузочный индикатор или сообщение
+  }
+
+
+  if (loading) {
+    return <div className="loading">Загрузка профиля...</div>;
+  }
 
 
   return (
@@ -137,7 +131,7 @@ const ProfilePage = () => {
           )}
         </section>
       </div>
-      <button onClick={logout}>Выйти</button>
+      <button onClick={handleLogout}>Выйти</button>
     </div>
   );
 };

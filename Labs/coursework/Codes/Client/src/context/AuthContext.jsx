@@ -1,68 +1,81 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useNotification } from './NotificationContext';
+import { createContext, useContext, useState, useEffect } from 'react';
+import axiosInstance from '../api/axiosInstance';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const { showNotification } = useNotification();
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-    // Выносим функцию checkAuth наружу и оборачиваем в useCallback
-    const checkAuth = useCallback(async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            setLoading(false);
+  const login = (accessToken, refreshToken, userData) => {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setUser(null);
+  };
+
+  const updateTokens = (accessToken, refreshToken) => {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+  };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        if (!accessToken || !refreshToken) {
+            setIsLoading(false);
             return;
-        }
-
+          }
+  
+          // Проверяем валидность access token
+          const { data } = await axiosInstance.get('/users/me');
+          setUser(data.user);
+      } catch (error) {
+        // Если access token невалиден, пробуем обновить токены
         try {
-            const response = await fetch('http://localhost:3000/api/users/me', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const { data } = await axiosInstance.post('/auth/refresh', { 
+                refreshToken: localStorage.getItem('refreshToken') 
             });
-
-            if (!response.ok) {
-                throw new Error('Сессия истекла');
-            }
-
-            const data = await response.json();
-            if (data.success) {
-                setUser(data.user);
-            }
-        } catch (error) {
-            showNotification(error.message, 'error');
-            localStorage.removeItem('token');
-        } finally {
-            setLoading(false);
+            
+            localStorage.setItem('accessToken', data.accessToken);
+            localStorage.setItem('refreshToken', data.refreshToken);
+            
+            const userResponse = await axiosInstance.get('/users/me');
+            setUser(userResponse.data.user);
+        } catch (refreshError) {
+            logout();
         }
-    }, [showNotification]);
-
-    useEffect(() => {
-        checkAuth();
-    }, [checkAuth]);
-
-    const login = (token, userData) => {
-        localStorage.setItem('token', token);
-        setUser({
-            id: userData.id,
-            username: userData.username,
-            role: userData.role, // Сохраняем роль в контексте
-            nickname: userData.nickname
-        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        setUser(null);
-    };
+    checkAuth();
+  }, []);
 
-    return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, isLoading, login, logout, updateTokens }}>
+      {!isLoading && children}
+    </AuthContext.Provider>
+  );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+      throw new Error('useAuth должен использоваться внутри AuthProvider');
+    }
+    return context;
+  };

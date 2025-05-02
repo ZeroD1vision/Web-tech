@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const authController = require('./controllers/authController');
 const movieController = require('./controllers/movieController');
-const JWT_SECRET = process.env.JWT_SECRET || '911onelove911';
+const JWT_SECRET = process.env.JWT_SECRET || '911onelove9111';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -101,16 +101,22 @@ app.use(express.json());
 // Аутентификация
 app.post('/api/auth/register', authController.registerUser);
 app.post('/api/auth/login', authController.loginUser);
+app.post('/api/auth/refresh', authController.refreshToken);
+app.post('/api/auth/logout', authController.logoutUser);
+
 app.get('/api/users/me', authMiddleware, authController.getCurrentUser);
 
 app.get('/api/user-levels/:levelId', async (req, res) => {
+    console.log(`Запрос уровня с ID: ${req.params.levelId}`);
     try {
         const level = await db.getLevelById(req.params.levelId);
+        console.log('Результат запроса уровня:', level);
         res.json({
             success: true,
             level
         });
     } catch (error) {
+        console.error('Ошибка:', error);
         res.status(500).json({
             success: false,
             message: 'Ошибка получения информации об уровне'
