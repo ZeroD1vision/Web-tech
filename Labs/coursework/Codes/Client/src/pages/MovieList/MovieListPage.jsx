@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import MovieFilters from './MovieFilters';
 import { useNotification } from '../../context/NotificationContext';
-import { fetchMovies, deleteMovie } from '../../services/movieService';
+import { fetchMovies, deleteMovie, searchMovies } from '../../services/movieService';
 import './MovieListPage.css';
 
 const MovieListPage = () => {
@@ -11,32 +12,73 @@ const MovieListPage = () => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const [filters, setFilters] = useState({
+        search: '',
+        genre: '',
+        yearFrom: '',
+        yearTo: ''
+    });
+    const [genres, setGenres] = useState([]);
 
     const isAdmin = user?.role === 'admin';
 
+    // Загрузка жанров
     useEffect(() => {
-        loadMovies();
-    }, []); // Пустой массив зависимостей, чтобы эффект выполнялся только при монтировании
-        
+        const loadGenres = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/genres');
+                const data = await response.json();
+                if (data.success) setGenres(data.genres);
+            } catch (error) {
+                showNotification('Ошибка загрузки жанров', 'error');
+            }
+        };
+        loadGenres();
+    }, []);
+
+    // Обработчик изменения фильтров
+    const handleFilterChange = (name, value) => {
+        setFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // Сброс фильтров
+    const resetFilters = () => {
+        setFilters({
+            search: '',
+            genre: '',
+            yearFrom: '',
+            yearTo: ''
+        });
+    };
+
+    // Загрузка фильмов с учетом фильтров
     const loadMovies = async () => {
         try {
-            const moviesData = await fetchMovies();
+            const moviesData = Object.values(filters).some(Boolean) 
+                ? await searchMovies(filters)
+                : await fetchMovies();
             
-            // Обрабатываем изображения
             const moviesWithImages = moviesData.map(movie => ({
                 ...movie,
                 image: movie.image 
                     ? `http://localhost:3000/${movie.image}`
                     : null
             }));
-        
+            
             setMovies(moviesWithImages);
-        } catch (err) {
-            showNotification(`Ошибка загрузки фильмов: ${err.message}`, 'error');
+        } catch (error) {
+            showNotification(`Ошибка загрузки фильмов: ${error.message}`, 'error');
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        loadMovies();
+    }, [filters]); // Пустой массив зависимостей, чтобы эффект выполнялся только при монтировании
 
     const handleDelete = async (movieId) => {
         const token = localStorage.getItem('token');
@@ -72,6 +114,13 @@ const MovieListPage = () => {
     return (
         <div className="movie-list-container">
             <h1>Наши фильмы</h1>
+
+            <MovieFilters
+                genres={genres}
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                resetFilters={resetFilters}
+            />
 
             {isAdmin && (
                 <button 

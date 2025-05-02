@@ -21,6 +21,7 @@ export const fetchMovies = async () => {
     }
 };
 
+
 export const deleteMovie = async (movieId) => {
     const response = await fetch(`http://localhost:3000/api/movies/${movieId}`, {
         method: 'DELETE',
@@ -36,6 +37,7 @@ export const deleteMovie = async (movieId) => {
     return response.json();
 };
 
+
 export const getMovieById = async (id) => {
     const response = await fetch(`http://localhost:3000/api/movies/${id}`);
 
@@ -46,7 +48,8 @@ export const getMovieById = async (id) => {
     const data = await response.json();
     if (!data.success) throw new Error('Ошибка получения данных');
     return data.movie;
-}
+};
+
 
 export const createMovie = async (movieData) => {
     const token = localStorage.getItem('token');
@@ -75,7 +78,8 @@ export const createMovie = async (movieData) => {
     }
     
     return response.json();
-}
+};
+
 
 export const updateMovie = async (id, movieData) => {
     const response = await fetch(`http://localhost:3000/api/movies/${id}`, {
@@ -97,4 +101,23 @@ export const updateMovie = async (id, movieData) => {
     }
     
     return response.json();
+};
+
+
+export const searchMovies = async (filters) => {
+    const params = new URLSearchParams();
+    
+    if (filters.search) params.append('search', filters.search);
+    if (filters.genre) params.append('genre', filters.genre);
+    if (filters.yearFrom) params.append('yearFrom', filters.yearFrom);
+    if (filters.yearTo) params.append('yearTo', filters.yearTo);
+
+    const response = await fetch(`${API_URL}/search?${params.toString()}`);
+    
+    if (!response.ok) {
+        throw new Error(`Ошибка поиска: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.data;
 };

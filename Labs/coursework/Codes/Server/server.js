@@ -151,28 +151,72 @@ app.get('/api/movies', async (req, res) => {
 app.get('/api/movies/search', async (req, res) => {
     try {
         const { search, genre, yearFrom, yearTo } = req.query;
-        
-        // Преобразуем параметры
-        const filters = {
-            search: search || '',
-            genre: genre ? parseInt(genre) : null,
-            yearFrom: yearFrom ? parseInt(yearFrom) : null,
-            yearTo: yearTo ? parseInt(yearTo) : null
-        };
 
-        // Получаем отфильтрованные фильмы
-        const movies = await db.searchMovies(filters);
+        let baseQuery = `
+            SELECT 
+                m.*,
+                COALESCE(AVG(r.rating), 0) AS rating,
+                COUNT(r.id) AS ratings_count,
+                ARRAY_AGG(DISTINCT g.id) AS genre_ids,
+                STRING_AGG(DISTINCT g.name, ', ') AS genres
+            FROM movies m
+            LEFT JOIN ratings r ON m.id = r.movie_id
+            LEFT JOIN movie_genres mg ON m.id = mg.movie_id
+            LEFT JOIN genres g ON mg.genre_id = g.id
+        `;
 
-        res.header('Content-Type', 'application/json');
-        res.json({
-            success: true,
-            data: movies
+        const conditions = [];
+        const params = [];
+
+        // Поиск по названию
+        if (search) {
+            conditions.push(`m.title ILIKE $${params.length + 1}`);
+            params.push(`%${search}%`);
+        }
+
+        // Фильтр по жанру
+        if (genre) {
+            conditions.push(`EXISTS (
+                SELECT 1 FROM movie_genres mg
+                WHERE mg.movie_id = m.id AND mg.genre_id = $${params.length + 1}
+            )`);
+            params.push(genre);
+        }
+
+        // Фильтр по году
+        const yearConditions = [];
+        if (yearFrom) {
+            yearConditions.push(`m.release_year >= $${params.length + 1}`);
+            params.push(parseInt(yearFrom));
+        }
+        if (yearTo) {
+            yearConditions.push(`m.release_year <= $${params.length + 1}`);
+            params.push(parseInt(yearTo));
+        }
+        if (yearConditions.length) {
+            conditions.push(`(${yearConditions.join(' AND ')})`);
+        }
+
+        // Собираем окончательный запрос
+        if (conditions.length) {
+            baseQuery += ' WHERE ' + conditions.join(' AND ');
+        }
+
+        baseQuery += ' GROUP BY m.id ORDER BY m.position';
+
+        const result = await db.pool.query(baseQuery, params);
+        res.json({ 
+            success: true, 
+            data: result.rows.map(movie => ({
+                ...movie,
+                release_year: parseInt(movie.release_year)
+            }))
         });
     } catch (error) {
         console.error('Search error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Ошибка поиска фильмов'
+        res.status(500).json({ 
+            success: false, 
+            message: 'Ошибка при выполнении поиска' 
         });
     }
 });

@@ -205,29 +205,21 @@ const updateMovie = async (id, movieData) => {
     return result.rows[0];
 };
 
+
 const updateMoviePosition = async (movieId, newPosition) => {
-    // Получаем текущую позицию элемента
-    const currentMovie = await getMovieById(movieId);
-    const currentPosition = currentMovie.position;
+    await pool.query(`
+        UPDATE movies
+        SET position = position + 1
+        WHERE position >= \$1 AND position < \$2
+    `, [newPosition, currentPosition]);
 
-    // Если новая позиция меньше текущей, увеличиваем позицию всех элементов между текущей и новой
-    if (newPosition < currentPosition) {
-        await db.query(`
-            UPDATE movies
-            SET position = position + 1
-            WHERE position >= \$1 AND position < \$2
-        `, [newPosition, currentPosition]);
-    } else if (newPosition > currentPosition) {
-        // Если новая позиция больше текущей, уменьшаем позицию всех элементов между текущей и новой
-        await db.query(`
-            UPDATE movies
-            SET position = position - 1
-            WHERE position > \$1 AND position <= \$2
-        `, [currentPosition, newPosition]);
-    }
+    await pool.query(`
+        UPDATE movies
+        SET position = position - 1
+        WHERE position > \$1 AND position <= \$2
+    `, [currentPosition, newPosition]);
 
-    // Обновляем позицию самого элемента
-    await db.query(`
+    await pool.query(`
         UPDATE movies
         SET position = \$1
         WHERE id = \$2
