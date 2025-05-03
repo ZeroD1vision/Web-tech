@@ -86,7 +86,62 @@ h2::after {
     background: linear-gradient(90deg, #ffd700, transparent);
 }
 
-button {
+.edit-profile-btn {
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    color: #c5a642 !important;
+    border: 1px solid rgba(197, 166, 66, 0.3);
+    padding: 0.8rem 2rem;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+    background: linear-gradient(45deg, 
+        #1a1a1a, 
+        #000);
+    color: #ffd700 !important;
+    color: #ffe08a;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+}
+
+.edit-profile-btn:hover {
+    color: #f8dede !important;
+    background: linear-gradient(135deg, 
+        rgba(142, 115, 29, 0.95), 
+        rgba(94, 73, 10, 0.95));
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.25);
+    transform: translateY(-2px);
+    border: 1px solid rgba(86, 71, 11, 0.933);
+}
+
+.delete-profile-btn {
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    color: #c5a642 !important;
+    border: 1px solid rgba(197, 166, 66, 0.3);
+    padding: 0.8rem 2rem;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+    background: linear-gradient(135deg, 
+        rgba(78, 8, 8, 0.9), 
+        rgba(201, 56, 56, 0.9));
+    color: #ffa8a8;
+    border: 1px solid rgba(89, 27, 4, 0.933);
+}
+
+.delete-profile-btn:hover {
+    color: #f8dede !important;
+    background: linear-gradient(135deg,
+        rgba(119, 8, 8, 0.95),
+        rgba(166, 15, 15, 0.95));
+    box-shadow: 0 4px 20px rgba(220, 7, 7, 0.25);
+    transform: translateY(-2px);
+    border: 1px solid rgba(98, 17, 5, 0.933);
+}
+
+.quit{
     background: linear-gradient(45deg, #3e3610, #2f2609);
     color: #c5a642 !important;
     border: 1px solid rgba(197, 166, 66, 0.3);
@@ -98,9 +153,22 @@ button {
     margin-top: 2rem;
 }
 
-button:hover {
-    background: linear-gradient(45deg, #4a3f0e, #3d320b);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+.quit:hover {
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    color: #c5a642 !important;
+    border: 1px solid rgba(197, 166, 66, 0.3);
+    padding: 0.8rem 2rem;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+    color: #f8dede !important;
+    background: linear-gradient(135deg, 
+        rgba(142, 115, 29, 0.95), 
+        rgba(94, 73, 10, 0.95));
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.25);
+    border: 1px solid rgba(86, 71, 11, 0.933);
     transform: translateY(-2px);
 }
 

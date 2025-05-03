@@ -243,7 +243,7 @@ h1::after {
 
 /* Добавить фильм */
 .add-movie-btn {
-    background: linear-gradient(45deg, #1a1a1a, #000);
+    background: linear-gradient(45deg, #1a1a1a, #000) !important;
     color: #ffd700 !important;
     border: 1px solid #ffd70033;
     padding: 12px 30px;

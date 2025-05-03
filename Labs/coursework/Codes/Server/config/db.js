@@ -166,6 +166,37 @@ const getAllUsersFromDB = async () => {
     return res.rows;
 };
 
+
+const updateUser = async (userId, userData) => {
+    const { nickname, email } = userData;
+    const query = `
+    UPDATE users
+    SET nickname = $1, email = $2
+    WHERE id = $3
+    RETURNING *
+    `;
+    const values = [nickname, email, userId];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        console.error('Ошибка обновления профиля пользователя', error);
+        throw new Error('Ошибка при обновлении профиля');
+    }
+};
+
+
+const deleteUserById = async (userId) => {
+    try {
+        await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+    } catch {
+        console.error('Ошибка обновления пользователя:', error);
+        throw new Error('Ошибка при обновлении профиля');
+    }
+};
+
+
 const createMovie = async (movieData) => {
     const { title, description, image, trailerid, position } = movieData;
     const query = `
@@ -260,6 +291,8 @@ module.exports = {
     addUserToDB,
     findUserById,
     findUserByUsernameInDB,
+    updateUser,
+    deleteUserById,
     getAllUsersFromDB,
     getAllMovies,
     getMovieById,
