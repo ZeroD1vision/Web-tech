@@ -43,6 +43,19 @@ const movieValidation = [
       .isInt({ min: 0 }).withMessage('Позиция должна быть положительным числом')
 ];
 
+
+const userUpdateValidation = [
+    body('nickname')
+        .trim()
+        .notEmpty().withMessage('Никнейм обязателен')
+        .isLength({ max: 30 }).withMessage('Максимум 30 символов'),
+
+    body('email')
+        .optional()
+        .isEmail().withMessage('Некорректный email')
+];
+
+
 const handleValidation = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -55,7 +68,8 @@ const handleValidation = (req, res, next) => {
         });
     }
     next();
-  };
+};
+
 
 // Middleware для проверки JWT
 const authMiddleware = (req, res, next) => {
@@ -105,6 +119,37 @@ app.post('/api/auth/refresh', authController.refreshToken);
 app.post('/api/auth/logout', authController.logoutUser);
 
 app.get('/api/users/me', authMiddleware, authController.getCurrentUser);
+app.put('/api/users/me', 
+    authMiddleware,
+    userUpdateValidation, 
+    handleValidation,
+    async (req, res) => {
+    try { 
+        const updatedUser = await db.updateUser(req.user.id, req.body);
+        res.json({
+            success: true,
+            user: updatedUser
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
+
+app.delete('/api/users/me', authMiddleware, async (req, res) => {
+    try {
+        await db.deleteUserById(req.user.id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({
+            success: false, 
+            message: 'Ошибка при удалении аккаунта'
+        });
+    }
+});
 
 app.get('/api/user-levels/:levelId', async (req, res) => {
     console.log(`Запрос уровня с ID: ${req.params.levelId}`);

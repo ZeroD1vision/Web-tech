@@ -20,13 +20,18 @@ const useScrollHandler = () => {
   useEffect(() => {
     const navbar = document.querySelector('.app-nav');
     let lastScroll = window.pageYOffset;
+    const SCROLL_THRESHOLD = 50;
 
     const handleScroll = () => {
       const currentScroll = window.pageYOffset;
-      const isScrollingDown = currentScroll > lastScroll;
-
-      navbar?.classList.toggle('app-nav--hidden', isScrollingDown && currentScroll > 60);
-      navbar?.classList.toggle('app-nav--visible', !isScrollingDown);
+      
+      if (currentScroll > lastScroll && currentScroll > SCROLL_THRESHOLD) {
+        navbar.classList.add('app-nav--hidden');
+        navbar.classList.remove('app-nav--visible');
+      } else if (currentScroll < lastScroll) {
+        navbar.classList.remove('app-nav--hidden');
+        navbar.classList.add('app-nav--visible');
+      }
       
       lastScroll = currentScroll;
     };
@@ -118,7 +123,7 @@ function AppContent() {
           alt="Логотип"
           className="logo-image"
         />
-        Celeston
+        Celeston Theatre
       </Link>
 
       <div className="nav-links">

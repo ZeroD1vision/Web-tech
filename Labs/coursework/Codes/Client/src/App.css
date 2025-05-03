@@ -84,17 +84,16 @@ body {
 /* Убираем все эффекты прозрачности */
 .app-nav--hidden {
   transform: translateY(-100%);
-  opacity: 1 !important; /* Фиксируем непрозрачность */
+  transition: transform 0.36s ease-in-out;
 }
 
 .app-nav--visible {
   transform: translateY(0);
-  opacity: 1 !important;
+  transition: transform 0.3s ease-in-out;
 }
 
-/* Для плавности контента под навбаром */
-body {
-  padding-top: 60px; /* Высота навбара */
+.app-container {
+  padding-top: 60px; /* Перенести сюда отступ */
 }
 
 /* Для логотипа добавляем эффекты в стиле общего дизайна */

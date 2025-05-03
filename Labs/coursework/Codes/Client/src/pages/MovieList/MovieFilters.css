@@ -69,17 +69,16 @@
     color: #c5a642 !important;
     border: 1px solid rgba(197, 166, 66, 0.3) !important;
     padding: 0.9rem 1.5rem;
-    border-radius: 30px;
+    border-radius: 10px;
     font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    top: -15px;
     overflow: hidden;
 }
 
 .reset-filters-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 0px rgba(197, 66, 66, 0.2);
+    box-shadow: 0 4px 0px rgba(36, 27, 4, 0.2);
     border-color: #c5a642 !important;
 }
 
@@ -155,8 +154,11 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Убираем фокус-ринги */
 .filter-group input:focus,
 .filter-group select:focus {
+    border-color: rgb(219, 184, 67); /* Белая граница */
+    box-shadow: 
+        0 0 0 1px rgba(145, 128, 60, 0.8), /* Белая "кайма" */
+        0 0 20px rgba(168, 166, 46, 0.3); /* Размытое белое свечение */
     outline: none;
-    box-shadow: 0 0 0 2px rgba(197, 166, 66, 0.5);
 }
 /* Стиль для выбранного элемента */
 .filter-group select option:checked {
