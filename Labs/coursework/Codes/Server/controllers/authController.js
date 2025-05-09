@@ -26,34 +26,41 @@ const generateTokens = (user) => {
 };
 
 const refreshToken = async (req, res) => {
-    const { refreshToken } = req.body;
+    // const { refreshToken } = req.body;
     
+    // try {
+    //     const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+    //     const user = await db.findUserById(decoded.id);
+        
+    //     if (!user) throw new Error('Пользователь не найден');
+        
+    //     const newTokens = generateTokens(user);
+        
+    //     res.json({
+    //         success: true,
+    //         ...newTokens
+    //     });
+
     try {
+        const refreshToken = req.cookies.refreshToken;
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
         const user = await db.findUserById(decoded.id);
-        
+
         if (!user) throw new Error('Пользователь не найден');
+
+        const { newAccessToken, refreshToken: newRefreshToken } = generateTokens(user);
+
+        // Обновляем куки
+        res.cookie('accessToken', newAccessToken, { /* options */ });
+        res.cookie('refreshToken', newRefreshToken, { /* options */ });
         
-        const newTokens = generateTokens(user);
-        
-        res.json({
-            success: true,
-            ...newTokens
-        });
-        
+        res.json({ success: true });
     } catch (error) {
         res.status(401).json({ 
             success: false,
             message: 'Недействительный refresh токен' 
         });
     }
-};
-
-
-const logoutUser = async (req, res) => {
-    // Здесь можно добавить логику инвалидации токенов
-    res.clearCookie('refreshToken');
-    res.json({ success: true, message: 'Выход выполнен успешно' });
 };
 
 
@@ -98,16 +105,48 @@ const loginUser = async (req, res) => {
             throw new Error('Неверные учетные данные');
         }
 
-        const tokens = generateTokens(user);
+        const { accessToken, refreshToken } = generateTokens(user);
+
+        // const tokens = generateTokens(user);
+
+        // res.json({
+        //     success: true,
+        //     ...tokens,
+        //     user: {
+        //         id: user.id,
+        //         username: user.username,
+        //         nickname: user.nickname,
+        //         role: user.role // Добавляем роль в ответ
+        //     },
+        //     message: 'Вход выполнен успешно!'
+        // });
+
+        // Устанавливаем куки
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: false, // Для HTTP в разработке
+            sameSite: "Lax", // Измените с "None" на "Lax" для локальной разработки
+            path: "/",
+            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
+            maxAge: 15 * 60 * 1000 // 15 минут
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: false, // Для HTTP в разработке
+            sameSite: "Lax", // Измените с "None" на "Lax" для локальной разработки
+            path: "/",
+            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 дней
+        });
 
         res.json({
             success: true,
-            ...tokens,
             user: {
                 id: user.id,
                 username: user.username,
                 nickname: user.nickname,
-                role: user.role // Добавляем роль в ответ
+                role: user.role
             },
             message: 'Вход выполнен успешно!'
         });
@@ -118,6 +157,23 @@ const loginUser = async (req, res) => {
         });
     }
 };
+
+
+const logoutUser = async (req, res) => {
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Должно совпадать с настройками при установке
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost'
+    };
+
+    res.clearCookie('refreshToken', cookieOptions);
+    res.clearCookie('accessToken', cookieOptions);
+    
+    res.json({ success: true, message: 'Вы вышли из аккаунта' });
+};
+
 
 const getCurrentUser = async (req, res) => {
     try {

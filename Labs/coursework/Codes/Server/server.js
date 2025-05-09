@@ -3,6 +3,7 @@ const cors = require('cors');
 const db = require('./config/db');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const { body, validationResult } = require('express-validator');
 const authController = require('./controllers/authController');
 const movieController = require('./controllers/movieController');
@@ -69,12 +70,17 @@ const handleValidation = (req, res, next) => {
     }
     next();
 };
-
+// Middleware cookies 
+app.use(cookieParser());
 
 // Middleware для проверки JWT
 const authMiddleware = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
-    console.log('Полученный токен:', token);
+    console.log("Cookies:", req.cookies);
+    
+    const token = req.cookies.accessToken;
+    console.log('Полученный токен из кук:', token);
+    // const token = req.headers.authorization?.split(' ')[1];
+    // console.log('Полученный токен:', token);
     
     if(!token) return res.status(401).json({ message: 'Требуется авторизация' });
 
@@ -104,11 +110,26 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 // Настройка CORS для безопасного взаимодействия с клиентом
 app.use(cors({
     origin: 'http://localhost:3001',
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Authorization'],
-    credentials: true
+    // exposedHeaders: ['Authorization'],
+    exposedHeaders: ['set-cookie']
 }));
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3001');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
+
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    console.log('Cookies:', req.cookies);
+    next();
+  });
+
+app.use(cookieParser());
 
 app.use(express.json());
 
