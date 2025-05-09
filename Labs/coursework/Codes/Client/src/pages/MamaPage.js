@@ -1,18 +1,22 @@
-import React, {useEffect, useState} from 'react';
-import fetchMovies from '../services/movieService';
+import React, { useEffect, useState } from 'react';
+import { fetchMovies } from '../services/movieService';
 import MovieCard from '../components/MovieCard';
 import SearchBar from '../components/SearchBar';
-
+import './MovieList/MovieListPage.css';
 const MamaPage = () => {
     const [ movies, setMovies ] = useState([]);
     const [ filteredMovies, setFilteredMovies ] = useState([]);
 
     useEffect(() => {
         const getMovies = async () => {
-            const data = await fetchMovies();
-            setMovies(data);
-            setFilteredMovies(data);
-        }
+            try {
+                const data = await fetchMovies();
+                setMovies(data);
+                setFilteredMovies(data);
+            } catch (error) {
+                console.error("Ошибка при загрузке фильмов:", error);
+            }
+        };
         getMovies();
     }, []);
 
@@ -25,18 +29,15 @@ const MamaPage = () => {
 
 
     return (
-        <div>
-            <h1>
-                Добро пожаловать в Киноафишу Celeston Theatre!
-            </h1>
+        <div className="mama-page">
+            <h1>Добро пожаловать в Киноафишу Celeston Theatre!</h1>
             <SearchBar onSearch={handleSearch} />
-            <div>
+            <div className="movies-container">
                 {filteredMovies.map(movie => (
-                    <movieCard key={movieId} movie={movie} />
+                    <MovieCard key={movie.id} movie={movie} />
                 ))}
             </div>
         </div>
-
     );
 };
 

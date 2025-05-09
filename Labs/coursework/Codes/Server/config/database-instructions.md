@@ -1,4 +1,3 @@
-```markdown
 # Документация по работе с PostgreSQL
 
 ## Установка и подключение к PostgreSQL
@@ -154,6 +153,20 @@ DROP COLUMN age;
 ```sql
 ALTER TABLE users
 ADD CONSTRAINT unique_email UNIQUE (email);
+```
+
+5. **Открыть все колонки таблицы**
+
+```sql
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_name = 'movies';
+```
+
+6. **Колонки таблицы в каком-либо порядке**
+
+```sql
+SELECT id, title, position FROM movies ORDER BY position;
 ```
 
 ### UPDATE

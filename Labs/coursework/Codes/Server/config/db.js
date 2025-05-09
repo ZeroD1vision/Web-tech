@@ -14,24 +14,78 @@ const pool = new Pool({
 // Проверяем соединение с базой данных
 pool.connect()
     .then(() => console.log('Подключение к PostgreSQL успешно!'))
-    .catch(err => console.error('Ошибка подключения к PostgreSQL', err.stack));
+    .catch(err => console.error('дключения к PostgreSQL', err.stack));
 
 
 // Функция для получения всех фильмов
 const getAllMovies = async () => {
-    const res = await pool.query('SELECT * FROM movies');
+    const res = await pool.query(`SELECT * 
+        FROM movies 
+        ORDER BY 
+            CASE WHEN position = 0 THEN 1 ELSE 0 END,
+            position ASC
+    `);
     return res.rows;
 };
 
 // Функция для получения фильма по ID
 const getMovieById = async (id) => {
-    console.log('Movie ID:', id); // Логируем ID перед выполнением запроса
+    const res = await pool.query(`
+        SELECT 
+          m.*,
+          COALESCE(AVG(r.rating), 0) AS rating,
+          COUNT(r.id) AS ratings_count,
+          ARRAY_AGG(DISTINCT g.id) FILTER (WHERE g.id IS NOT NULL) AS genre_ids,
+          STRING_AGG(DISTINCT g.name, ', ') AS genres
+        FROM movies m
+        LEFT JOIN ratings r ON m.id = r.movie_id
+        LEFT JOIN movie_genres mg ON m.id = mg.movie_id
+        LEFT JOIN genres g ON mg.genre_id = g.id
+        WHERE m.id = $1
+        GROUP BY m.id
+      `, [id]);
+      return {
+        ...res.rows[0],
+        release_year: parseInt(res.rows[0].release_year) || null
+    };
+};
 
-    if (!id) {
-        throw new Error('ID cannot be undefined or null');
+const deleteMovieById = async (id) => {
+    try {
+        const result = await pool.query(
+            'DELETE FROM movies WHERE id = $1 RETURNING *', 
+            [id]
+        );
+        
+        if (result.rowCount === 0) {
+            throw new Error(`Фильм с ID ${id} не найден`);
+        }
+        
+        return result.rows[0];
+    } catch (error) {
+        console.error(`Ошибка удаления фильма ID ${id}:`, error);
+        throw error;
     }
-    const res = await pool.query('SELECT * FROM movies WHERE id = \$1', [id]);
-    return res.rows[0];
+};
+
+// Получение всех жанров
+const getAllGenres = async () => {
+    const res = await pool.query('SELECT * FROM genres');
+    return res.rows;
+};
+
+// Обновление жанров фильма
+const updateMovieGenres = async (movieId, genreIds) => {
+    // Удаляем старые жанры
+    await pool.query('DELETE FROM movie_genres WHERE movie_id = $1', [movieId]);
+    
+    // Добавляем новые
+    for (const genreId of genreIds) {
+        await pool.query(
+            'INSERT INTO movie_genres (movie_id, genre_id) VALUES ($1, $2)',
+            [movieId, genreId]
+        );
+    }
 };
 
 // Функция для добавления пользователя в базу данных
@@ -43,8 +97,8 @@ const addUserToDB = async (user) => {
         throw new Error('Никнейм уже существует. Пожалуйста, выберите другой.');
     }
 
-    const query = 'INSERT INTO users (username, nickname, password) VALUES (\$1, \$2, \$3) RETURNING *';
-    const values = [user.username, user.nickname, user.password];
+    const query = 'INSERT INTO users (username, nickname, password, level) VALUES (\$1, \$2, \$3, \$4) RETURNING *';
+    const values = [username, nickname, password, 0]; // Уровень по умолчанию 0
     
     try {
         const result = await pool.query(query, values);
@@ -62,7 +116,15 @@ const addUserToDB = async (user) => {
 };
 
 const findUserById = async (id) => {
-    const result = await pool.query('SELECT * FROM users WHERE id = \$1', [id]);
+    const result = await pool.query(`
+    SELECT 
+      users.*,
+      user_levels.name as level_name,
+      user_levels.description as level_description
+    FROM users
+    LEFT JOIN user_levels ON users.level = user_levels.id
+    WHERE users.id = $1
+  `, [id]);
     return result.rows[0]; // Возвращаем первого найденного пользователя или undefined
 };
 
@@ -83,13 +145,19 @@ const nicknameExists = async (nickname) => {
 
 // Функция для поиска пользователя по имени в базе данных
 const findUserByUsernameInDB = async (username) => {
-    if (!username) {
-        throw new Error('Username cannot be undefined or null');
-    }
-    const query = 'SELECT * FROM users WHERE username = \$1';
+    const query = `
+        SELECT 
+            id, 
+            username, 
+            password, 
+            nickname, 
+            role, 
+            level
+        FROM users 
+        WHERE username = $1
+    `;
     const result = await pool.query(query, [username]);
-    console.log('Результат запроса:', result.rows[0]);
-    return result.rows[0]; // Возвращает первого найденного пользователя или undefined
+    return result.rows[0];
 };
 
 // Функция для получения всех пользователей (при необходимости)
@@ -98,76 +166,143 @@ const getAllUsersFromDB = async () => {
     return res.rows;
 };
 
-const updateMovie = async (id, updatedData) => {
-    const { title, description, image } = updatedData;
+
+const updateUser = async (userId, userData) => {
+    const { nickname, email } = userData;
+    const query = `
+    UPDATE users
+    SET nickname = $1, email = $2
+    WHERE id = $3
+    RETURNING *
+    `;
+    const values = [nickname, email, userId];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        console.error('Ошибка обновления профиля пользователя', error);
+        throw new Error('Ошибка при обновлении профиля');
+    }
+};
+
+
+const deleteUserById = async (userId) => {
+    try {
+        await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+    } catch {
+        console.error('Ошибка обновления пользователя:', error);
+        throw new Error('Ошибка при обновлении профиля');
+    }
+};
+
+
+const createMovie = async (movieData) => {
+    const { title, description, image, trailerid, position } = movieData;
+    const query = `
+        INSERT INTO movies 
+            (title, 
+            description, 
+            image, 
+            trailerid, 
+            position,
+            release_year = $6)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
+    `;
+    const values = [
+        title, 
+        description, 
+        image, 
+        trailerid, 
+        position || 0,
+        release_year ? parseInt(release_year) : null
+    ];
+
+    try {
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        console.error('Ошибка создания фильма:', error);
+        throw error;
+    }
+}
+
+const updateMovie = async (id, movieData) => {
+    const { title, description, image, trailerid, position, release_year } = movieData;
     const query = `
         UPDATE movies
-        SET title = \$1, description = \$2, image = \$3
-        WHERE id = \$4
+        SET title = $1, 
+            description = $2, 
+            image = $3, 
+            trailerid = $4, 
+            position = $5,
+            release_year = $6
+        WHERE id = $7
+        RETURNING *
     `;
-
-    try {
-        const result = await pool.query(query, [title, description, image, id]);
-        return result.rowCount > 0; // Возвращаем true, если обновление прошло успешно
-    } catch (error) {
-        console.error('Ошибка обновления фильма:', error);
-        throw error; // Пробрасываем ошибку дальше для обработки в контроллере
-    }
+    const values = [
+        title, 
+        description, 
+        image, 
+        trailerid, 
+        position || 0, 
+        release_year ? parseInt(release_year) : null,
+        id];
+    
+    const result = await pool.query(query, values);
+    return result.rows[0];
 };
 
-const deleteMovieById = async (id) => {
-    console.log(id);
-    try {
-        console.log('await');
-        const result = await pool.query('DELETE FROM movies WHERE id = \$1', [id]);
-        console.log('afterawait');
-        console.log(result);
-        return true;
-    } catch (err) {
-        console.error(err);
-        throw new Error('Ошибка сервера'); // Генерируем ошибку для обработки в контроллере
-    }
-};
 
 const updateMoviePosition = async (movieId, newPosition) => {
-    // Получаем текущую позицию элемента
-    const currentMovie = await getMovieById(movieId);
-    const currentPosition = currentMovie.position;
+    await pool.query(`
+        UPDATE movies
+        SET position = position + 1
+        WHERE position >= \$1 AND position < \$2
+    `, [newPosition, currentPosition]);
 
-    // Если новая позиция меньше текущей, увеличиваем позицию всех элементов между текущей и новой
-    if (newPosition < currentPosition) {
-        await db.query(`
-            UPDATE movies
-            SET position = position + 1
-            WHERE position >= \$1 AND position < \$2
-        `, [newPosition, currentPosition]);
-    } else if (newPosition > currentPosition) {
-        // Если новая позиция больше текущей, уменьшаем позицию всех элементов между текущей и новой
-        await db.query(`
-            UPDATE movies
-            SET position = position - 1
-            WHERE position > \$1 AND position <= \$2
-        `, [currentPosition, newPosition]);
-    }
+    await pool.query(`
+        UPDATE movies
+        SET position = position - 1
+        WHERE position > \$1 AND position <= \$2
+    `, [currentPosition, newPosition]);
 
-    // Обновляем позицию самого элемента
-    await db.query(`
+    await pool.query(`
         UPDATE movies
         SET position = \$1
         WHERE id = \$2
     `, [newPosition, movieId]);
 }
 
+const getLevelById = async (levelId) => {
+    try {
+        const { rows } = await pool.query(
+            'SELECT * FROM user_levels WHERE id = $1',
+            [levelId]
+        );
+        return rows[0] || null;
+    } catch (error) {
+        throw new Error(`Ошибка получения уровня: ${error.message}`);
+    }
+};
+
 module.exports = {
     addUserToDB,
     findUserById,
     findUserByUsernameInDB,
+    updateUser,
+    deleteUserById,
     getAllUsersFromDB,
     getAllMovies,
     getMovieById,
+    deleteMovieById,
+    getAllGenres,
+    updateMovieGenres,
     nicknameExists,
+    createMovie,
     updateMovie,
     updateMoviePosition,
-    deleteMovieById,
+    getLevelById,
     pool,
 };
