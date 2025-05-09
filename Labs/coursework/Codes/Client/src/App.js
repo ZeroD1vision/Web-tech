@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
@@ -16,29 +16,39 @@ import MoviePage from './pages/MoviePage/MoviePage';
 
 import './App.css';
 
-const useScrollHandler = () => {
+const useScrollHandler = (navRef) => {
   useEffect(() => {
-    const navbar = document.querySelector('.app-nav');
-    let lastScroll = window.pageYOffset;
-    const SCROLL_THRESHOLD = 50;
+    const navbar = navRef.current;
+    if (!navbar) return;
 
-    const handleScroll = () => {
-      const currentScroll = window.pageYOffset;
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const updateNavbar = () => {
+      if (!navbar) return;
+      const currentScrollY = window.scrollY;
       
-      if (currentScroll > lastScroll && currentScroll > SCROLL_THRESHOLD) {
+      if (currentScrollY > lastScrollY && currentScrollY > 60) {
         navbar.classList.add('app-nav--hidden');
         navbar.classList.remove('app-nav--visible');
-      } else if (currentScroll < lastScroll) {
+      } else {
         navbar.classList.remove('app-nav--hidden');
         navbar.classList.add('app-nav--visible');
       }
-      
-      lastScroll = currentScroll;
+      lastScrollY = currentScrollY;
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateNavbar);
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [navRef]);
 };
 
 const PageTitle = () => {
@@ -93,7 +103,6 @@ const RequireAuth = ({ children }) => {
 
 
 function App() {
-  useScrollHandler();
 
   return (
     <div className="app-container">
@@ -111,12 +120,14 @@ function App() {
   );
 }
 function AppContent() {
-  const { user } = useAuth(); // Теперь хук используется внутри AuthProvider
+  const { user } = useAuth();
+  const navRef = useRef(null);
+
+  useScrollHandler(navRef);
 
   return (
     <>
-      {/* Навигационное меню с CSS-классами */}
-      <nav className="app-nav">
+      <nav className="app-nav" ref={navRef}>
       <Link to="/" className="nav-logo">
         <img 
           src="/logo.png" 
