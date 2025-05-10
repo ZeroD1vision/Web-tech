@@ -118,6 +118,7 @@ const registerUser = async (req, res) => {
                 id: user.id,
                 username: user.username,
                 nickname: user.nickname,
+                email: user.email,
                 role: user.role
             },
             message: 'Теперь вы зарегистрированы!'
@@ -228,7 +229,7 @@ const getCurrentUser = async (req, res) => {
         if (!user) throw new Error('Пользователь не найден');
 
         let levelInfo = null;
-        if (user.level) {
+        if (typeof user.level !== 'undefined' && user.level !== null) {
             levelInfo = await db.getLevelById(user.level);
         }
         
@@ -236,6 +237,7 @@ const getCurrentUser = async (req, res) => {
             id: user.id,
             username: user.username,
             nickname: user.nickname,
+            email: user.email,
             role: user.role,
             credits: Number(user.credits),
             tickets: Number(user.tickets),
