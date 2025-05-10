@@ -66,28 +66,75 @@ const refreshToken = async (req, res) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { username, nickname, password } = req.body;
+        // Деструктурируем с значениями по умолчанию
+        const { 
+            username, 
+            nickname = null, 
+            password, 
+            email = null 
+        } = req.body;
+
+        // Валидация обязательных полей
+        if (!username || !password) {
+            throw new Error('Username и password обязательны');
+        }
         
         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-        const user = await db.addUserToDB({
-            username,
-            nickname,
-            password: hashedPassword
-        });
         
-        const tokens = generateTokens(user);
+        // Передаём только существующие значения
+        const userData = {
+            username,
+            password: hashedPassword,
+            ...(nickname && { nickname }), // Добавляем только если есть
+            ...(email && { email })       // Добавляем только если есть
+        };
+
+        const user = await db.addUserToDB(userData);
+        
+        const { accessToken, refreshToken } = generateTokens(user);
+
+        // Устанавливаем куки
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+            path: "/",
+            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
+            maxAge: 15 * 60 * 1000 // 15 минут
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+            path: "/",
+            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 дней
+        });
 
         res.status(201).json({
             success: true,
-            ...tokens,
             user: {
                 id: user.id,
                 username: user.username,
                 nickname: user.nickname,
-                role: user.role // Добавляем роль в ответ
+                role: user.role
             },
-            message: 'Теперь вы зарегестрированы!'
+            message: 'Теперь вы зарегистрированы!'
         });
+        // const tokens = generateTokens(user);
+
+        // res.status(201).json({
+        //     success: true,
+        //     ...tokens,
+        //     user: {
+        //         id: user.id,
+        //         username: user.username,
+        //         nickname: user.nickname,
+        //         role: user.role // Добавляем роль в ответ
+        //     },
+        //     message: 'Теперь вы зарегестрированы!'
+        // });
     } catch (error) {
         res.status(400).json({
             success: false,
@@ -124,8 +171,8 @@ const loginUser = async (req, res) => {
         // Устанавливаем куки
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
-            secure: false, // Для HTTP в разработке
-            sameSite: "Lax", // Измените с "None" на "Lax" для локальной разработки
+            secure: process.env.NODE_ENV === 'production', // Для HTTP в разработке
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', // "None" на "Lax" для локальной разработки
             path: "/",
             domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
             maxAge: 15 * 60 * 1000 // 15 минут
@@ -133,8 +180,8 @@ const loginUser = async (req, res) => {
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: false, // Для HTTP в разработке
-            sameSite: "Lax", // Измените с "None" на "Lax" для локальной разработки
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
             path: "/",
             domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 дней
