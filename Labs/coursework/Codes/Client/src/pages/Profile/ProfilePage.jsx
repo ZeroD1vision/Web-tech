@@ -25,6 +25,7 @@ const ProfilePage = () => {
   
       try {
         const userResponse = await axiosInstance.get('/users/me');
+        console.log('Данные пользователя:', userResponse.data.user);
         const newUserData = userResponse.data.user;
 
         // Сначала обновляем данные пользователя
@@ -35,7 +36,7 @@ const ProfilePage = () => {
         });
   
         // Затем загружаем уровень
-        if (newUserData.level?.id) {
+        if (typeof newUserData.level?.id !== 'undefined') {
           try {
             setLoadingLevel(true);
             const levelResponse = await axiosInstance.get(`/user-levels/${newUserData.level.id}`);
