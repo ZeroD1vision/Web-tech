@@ -19,16 +19,35 @@ const RegistrationForm = () => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        const response = await axiosInstance.post('/auth/register', formData);
+        // 1. Отправляем запрос на регистрацию с куками
+        await axiosInstance.post('/auth/register', formData, {
+            withCredentials: true
+        });
+
+        // 2. Исккусственная задержка для синхронизации куков
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        //3. Получаем данные пользователя с обновленными куками 
+        const userResponse = await axiosInstance.get('/users/me', {
+            withCredentials: true
+        });
         
-        login(
-          response.data.accessToken,
-          response.data.refreshToken,
-          response.data.user
-        );
+        // 4. Обновляем состояние аутентификации
+        login(userResponse.data.user);
+            
+        showNotification('Вы зарегестрированы!', 'success');
         
-        showNotification('Регистрация успешна!', 'success');
-        navigate('/profile');
+        // 5. Навигация с полным обновлением страницы
+        window.location.href = '/profile';
+
+        // login(
+        //   response.data.accessToken,
+        //   response.data.refreshToken,
+        //   response.data.user
+        // );
+        
+        // showNotification('Регистрация успешна!', 'success');
+        // navigate('/profile');
       } catch (error) {
         showNotification(error.response?.data?.message || 'Ошибка регистрации', 'error');
       }
