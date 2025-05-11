@@ -206,13 +206,13 @@
 }
 
 .btn-cancel {
-    background: rgba(70, 10, 10, 0.7);
+    background: linear-gradient(45deg, #5b0b0ac6, #9c1313);
     color: #ff9999;
     border: 1px solid rgba(255, 77, 77, 0.3);
 }
 
 .btn-cancel:hover {
-    background: rgba(100, 20, 20, 0.8);
+    background: linear-gradient(45deg, #890e0cc6, #ae0b0b);
     box-shadow: 0 4px 15px rgba(255, 77, 77, 0.2);
     transform: translateY(-2px);
 }
