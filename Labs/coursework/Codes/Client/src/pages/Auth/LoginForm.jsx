@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Form, Field } from 'react-final-form';
 import axiosInstance from '../../api/axiosInstance';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -12,7 +13,108 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+
+    // //Валидация полей
+    // const validate = (values) => {
+    //   const errors = {};
+    //   if (!values.username) errors.username = 'Введите логин';
+    //   if (!values.password) errors.username = 'Введите пароль';
+    //   return errors;
+    // };
   
+    // // Обработка отправки формы
+    // const handleSubmit = async (values) => {
+    //   try {
+    //     await axiosInstance.post(
+    //       '/auth/login', 
+    //       values, { withCreadentials: true }
+    //     );
+
+    //     await new Promise(resolve => setTimeout(resolve, 100));
+
+    //     const userResponse = await axiosInstance.get(
+    //       '/users/me', 
+    //       { withCredentials: true }
+    //     );
+
+    //     login(userResponse.data.user);
+
+    //     showNotification('Успешный вход', 'success');
+
+    //     setTimeout(() => {
+    //       window.location.href = '/profile';
+    //     }, 600);
+    //   } catch (error) {
+    //     const serverMessage = error.response?.data?.message;
+    //     const errorMessage = serverMessage || 'Ошибка подключения к серверу';
+    //     showNotification(errorMessage, 'error');
+    //     return { serverError: errorMessage }; // Возвращаем ошибку для формы
+    //   }
+    // };
+
+  //   return (
+  //     <div className="auth-container">
+  //       <div className='auth-form'>
+  //         <h2>Вход</h2>
+  //         <Form
+  //           onSubmit={handleSubmit}
+  //           validate={validate}
+  //           render={({ handleSubmit, submitting, submitError, form }) => (
+  //             <form onSubmit={handleSubmit}>
+  //               <Field name="username">
+  //                 {({ input, meta }) => (
+  //                   <div className="form-group">
+  //                     <input 
+  //                       {...input}
+  //                       type="text"
+  //                       placeholder="Имя пользователя"
+  //                       className={meta.error && meta.touched ? 'invalid' : ''}
+  //                     />
+  //                     {meta.error && meta.touched && (
+  //                       <div className="error-message">{meta.error}</div>
+  //                     )}
+  //                   </div>
+  //                 )}
+  //               </Field>
+
+  //               <Field name="password">
+  //                 {({input, meta}) => (                    <div className="form-group">
+  //                     <input 
+  //                       {...input}
+  //                       type="password"
+  //                       placeholder="Пароль"
+  //                       className={meta.error && meta.touched ? 'invalid' : ''}
+  //                     />
+  //                     {meta.error && meta.touched && (
+  //                       <div className="error-message">{meta.error}</div>
+  //                     )}
+  //                   </div>
+  //   )}
+  //               </Field>
+
+  //               {form.getState().submitError && (
+  //                 <div className="error-message">
+  //                   {form.getState().submitError}
+  //                 </div>
+  //               )}
+                
+  //               <button type="submit" disabled={submitting}>
+  //                   {submitting ? 'Отправка...' : 'Войти'}
+  //               </button>
+
+  //               <div className="auth-link">
+  //                   Нет аккаунта? <Link to="/register">Зарегистрируйтесь</Link>
+  //               </div>
+  //             </form>
+  //           )}
+  //         />
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  // export default LoginForm;
+
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
@@ -54,7 +156,7 @@ const LoginForm = () => {
         showNotification(errorMessage, 'error');
       }
     };
-
+    
     return (
         <div className="auth-container">
             <div className='auth-form'>
