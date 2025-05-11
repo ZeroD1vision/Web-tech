@@ -76,46 +76,87 @@
     border: 1px solid rgba(197, 166, 66, 0.2);
 }
 
+/* Контейнер жанров */
 .genres-select {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    padding: 1rem;
-    border: 1px solid #3d3d3d;
-    border-radius: 8px;
-  }
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    padding: 15px;
+}
 
+/* Элемент жанра */
 .genre-checkbox {
     position: relative;
+    padding: 16px;
+    background: rgba(40, 36, 18, 0.4);
+    border: 1px solid rgba(197, 166, 66, 0.15);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
-    padding: 0.8rem 1.2rem;
-    background: rgba(22, 20, 10, 0.5);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    justify-content: center;
+    text-align: center;
+    min-height: 20px;
 }
 
-.genre-checkbox:hover {
-    background: rgba(22, 20, 10, 0.8);
-    transform: translateY(-2px);
+/* Состояние выбранного жанра */
+.genre-checkbox:has(input:checked) {
+    transform: scale(1.01);
+    z-index: 1;
+    box-shadow: 0 4px 20px rgba(186, 156, 57, 0.3);
 }
 
+/* Анимация увеличения */
+.genre-checkbox input:checked {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Скрытие нативного чекбокса */
 .genre-checkbox input {
-    margin-right: 0.8rem;
-    accent-color: #ffd700;
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
 }
 
-.genre-checkbox span {
-    color: #c6b973;
-    font-weight: 500;
+/* Ховер-эффект */
+.genre-checkbox:hover {
+    background: rgba(50, 46, 28, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(197, 166, 66, 0.2);
 }
+
+/* Рамка для выбранного элемента */
+.genre-checkbox:has(input:checked)::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2px solid #ffd700;
+    border-radius: 10px;
+    animation: genreSelect 0.4s ease;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+@keyframes genreSelect {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Текст */
+.genre-checkbox span {
+    position: relative;
+    display: block;
+    width: 100%;
+    text-align: left; /* Выравнивание текста по левому краю */
+}
+
+/* Обработка ошибок */
 
 .form-group.invalid input,
 .form-group.invalid textarea,
 .form-group.invalid .genres-select {
-  border-color: #ff4d4d;
-  box-shadow: 0 0 8px rgba(255, 77, 77, 0.2);
+    border-color: #ff4d4d;
+    box-shadow: 0 0 8px rgba(255, 77, 77, 0.2);
 }
 
 .error-message {

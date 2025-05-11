@@ -90,15 +90,20 @@ const updateMovieGenres = async (movieId, genreIds) => {
 
 // Функция для добавления пользователя в базу данных
 const addUserToDB = async (user) => {
-    const { username, nickname, password } = user;
+    const { username, nickname, password, email } = user;
 
     // Проверяем, существует ли никнейм
     if (await nicknameExists(nickname)) {
         throw new Error('Никнейм уже существует. Пожалуйста, выберите другой.');
     }
 
-    const query = 'INSERT INTO users (username, nickname, password, level) VALUES (\$1, \$2, \$3, \$4) RETURNING *';
-    const values = [username, nickname, password, 0]; // Уровень по умолчанию 0
+    const query = `
+        INSERT INTO users 
+            (username, nickname, password, email, level) 
+        VALUES ($1, $2, $3, $4, $5) 
+        RETURNING *
+    `;
+    const values = [username, nickname, password, email, 0]; // Уровень по умолчанию 0
     
     try {
         const result = await pool.query(query, values);
