@@ -148,31 +148,31 @@ function AppContent() {
       </nav>
 
       <Routes>
-      <Route path="/" element={<MamaPage />} />
-      <Route path="/movies" element={<MovieListPage />} />
-      <Route path="/premieres" element={<PremieresPage />} />
-      <Route 
-        path="/profile" 
-        element={
-          <RequireAuth>
-            <ProfilePage />
-          </RequireAuth>
-        }
-      />
-      <Route path="/login" element={<LoginForm />} />
-      <Route path="/register" element={<RegistrationForm />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/movies/:id" element={<MoviePage />} />
-      {/*Для админов*/}
-      <Route path="/movies/new" element={<MovieFormPage />} />
-      <Route path="/movies/:id/edit" element={<MovieFormPage />} />
-      {/*Несуществующие пути*/}
-      <Route path="*" element={
-        <div className="error-page">
-          <h2>404 - Страница не найдена</h2>
-          <Link to="/" className="nav-link">Вернуться на главную</Link>
-        </div>
-      } />
+        <Route path="/" element={<MamaPage />} />
+        <Route path="/movies" element={<MovieListPage />} />
+        <Route path="/premieres" element={<PremieresPage />} />
+        <Route 
+          path="/profile" 
+          element={
+            <RequireAuth>
+              <ProfilePage />
+            </RequireAuth>
+          }
+        />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/register" element={<RegistrationForm />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/movies/:id" element={<MoviePage />} />
+        {/*Для админов*/}
+        <Route path="/movies/new" element={<MovieFormPage />} />
+        <Route path="/movies/:id/edit" element={<MovieFormPage />} />
+        {/*Несуществующие пути*/}
+        <Route path="*" element={
+          <div className="error-page">
+            <h2>404 - Страница не найдена</h2>
+            <Link to="/" className="nav-link">Вернуться на главную</Link>
+          </div>
+        } />
       </Routes>
 
       <footer className="app-footer">

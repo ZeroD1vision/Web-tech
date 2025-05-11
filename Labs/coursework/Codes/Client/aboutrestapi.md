@@ -226,7 +226,7 @@ const movies = await Movie.find()
   .limit(limit);
 ```
 
-Для полной интеграции добавьте эти маршруты в ваш Express-сервер и убедитесь, что все зависимости установлены:
+Для полной интеграции добавим пару маршрутов в сервер:
 ```bash
 npm install express-validator mongoose
 ```
