@@ -47,13 +47,17 @@ const MovieFormPage = () => {
     const firstErrorRef = useRef(null);
 
     const scrollToError = () => {
-        if (firstErrorRef.current) {
-          firstErrorRef.current.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          });
+        const firstErrorElement = document.querySelector('.invalid');
+        if (firstErrorElement) {
+            const rect = firstErrorElement.getBoundingClientRect();
+            const scrollTarget = rect.top + window.pageYOffset - (window.innerHeight / 2 - rect.height / 2);
+            
+            window.scrollTo({
+                top: scrollTarget,
+                behavior: 'smooth'
+            });
         }
-      };
+};
     
     useEffect(() => {
         // Загрузка списка жанров
@@ -112,6 +116,7 @@ const MovieFormPage = () => {
             const validationErrors = validateForm(formData, selectedGenres);
             if (Object.keys(validationErrors).length > 0) {
                 setErrors(validationErrors);
+                await new Promise(resolve => setTimeout(resolve, 50)); // Даем время на рендер ошибок
                 scrollToError();
                 return;
             }
@@ -154,20 +159,19 @@ const MovieFormPage = () => {
         const hasError = !!errors[name];
         return (
             <div 
-              className={`form-group ${hasError ? 'invalid' : ''}`} 
-              ref={hasError && !firstErrorRef.current ? (el => firstErrorRef.current = el) : null}
+                className={`form-group ${hasError ? 'invalid' : ''}`} 
             >
-              <label>{label}:</label>
-              <input
-                type={type}
-                value={formData[name]}
-                onChange={(e) => {
-                  setFormData({...formData, [name]: e.target.value});
-                  setErrors(prev => ({...prev, [name]: ''}));
-                }}
-                {...extraProps}
-              />
-              {errors[name] && <span className="error-message">{errors[name]}</span>}
+                <label>{label}:</label>
+                <input
+                    type={type}
+                    value={formData[name]}
+                    onChange={(e) => {
+                        setFormData({...formData, [name]: e.target.value});
+                        setErrors(prev => ({...prev, [name]: ''}));
+                    }}
+                    {...extraProps}
+                />
+                {errors[name] && <span className="error-message">{errors[name]}</span>}
             </div>
         );
     };
@@ -185,50 +189,6 @@ const MovieFormPage = () => {
                 {/* {renderField('image', 'Изображение')} */}
                 {renderField('trailerid', 'Идентификатор трейлера')}
                 {renderField('position', 'Позиция', 'number', { min: 0 })}
-{/* 
-                    <div className="form-group">
-                    <label>Название:</label>
-                    <input
-                        type="text"
-                        value={formData.title}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        required
-                    />
-                </div>
-                
-                <div className="form-group">
-                    <label>Описание:</label>
-                    <textarea
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Год выпуска:</label>
-                    <input
-                        type="number"
-                        value={formData.release_year || ''}
-                        onChange={(e) => setFormData({
-                            ...formData,
-                            release_year: e.target.value ? parseInt(e.target.value) : ''
-                        })}
-                        min="1900"
-                        max={new Date().getFullYear()}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Изображение:</label>
-                    <input
-                        type="text"
-                        value={formData.image}
-                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                        required
-                    />
-                </div> 
-*/}
                 
                 {/* Секция выбора жанров */}
                 <div className="form-group">
@@ -253,30 +213,7 @@ const MovieFormPage = () => {
                     </div>
                     {errors.genres && <span className="error-message">{errors.genres}</span>}
                 </div>
-{/*
-                <div className="form-group">
-                    <label>Идентификатор трейлера:</label>
-                    <input
-                        type="text"
-                        value={formData.trailerid}
-                        onChange={(e) => setFormData({ ...formData, trailerid: e.target.value })}
-                        required
-                    />
-                </div>
 
-                <div className="form-group">
-                    <label>Позиция:</label>
-                        <input
-                            type="number"
-                            value={formData.position ?? 0} // Добавить fallback значение
-                            onChange={(e) => setFormData({
-                                ...formData,
-                                position: Number(e.target.value) || 0
-                            })}
-                            min="0"
-                        />
-                </div>
-*/}
                 <div className="form-actions">
                     <button type="submit" className="btn-save">
                         {id ? 'Сохранить изменения' : 'Создать фильм'}

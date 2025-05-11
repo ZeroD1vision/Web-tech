@@ -16,16 +16,37 @@ const LoginForm = () => {
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        const response = await axiosInstance.post('/auth/login', { username, password });
+        // 1. Отправляем запрос на вход
+        const response = await axiosInstance.post('/auth/login', { 
+          username, 
+          password 
+        }, { 
+            withCredentials: true
+        });
+
+        // 2. Искусственная задержка для синхронизации кук
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        login(
-          response.data.accessToken,
-          response.data.refreshToken,
-          response.data.user
-        );
+        // login(
+        //   response.data.accessToken,
+        //   response.data.refreshToken,
+        //   response.data.user
+        // );
+
+        // 3. Получаем данные пользователя с обновлёнными куками
+        const userResponse = await axiosInstance.get('/users/me', {
+          withCredentials: true
+        });
+
+        // 4. Обновляем состояние аутентификации
+        login(userResponse.data.user);
         
         showNotification('Успешный вход!', 'success');
-        navigate('/profile');
+        
+        // 5. Навигация без использования истории
+        setTimeout(() => {
+          window.location.href = '/profile';
+        }, 600); // Даем чутчут на отображение уведомления
       } catch (error) {
         const serverMessage = error.response?.data?.message;
         const errorMessage = serverMessage || 'Ошибка подключения к серверу';
