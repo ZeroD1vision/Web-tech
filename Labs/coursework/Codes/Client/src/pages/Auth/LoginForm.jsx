@@ -42,8 +42,11 @@ const LoginForm = () => {
         login(userResponse.data.user);
         
         showNotification('Успешный вход!', 'success');
+        
         // 5. Навигация без использования истории
-        window.location.href = '/profile';
+        setTimeout(() => {
+          window.location.href = '/profile';
+        }, 600); // Даем чутчут на отображение уведомления
       } catch (error) {
         const serverMessage = error.response?.data?.message;
         const errorMessage = serverMessage || 'Ошибка подключения к серверу';
