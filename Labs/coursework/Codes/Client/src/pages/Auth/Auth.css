@@ -224,3 +224,50 @@
 .auth-link a:hover::after {
     width: 100%;
 }
+
+
+/* Стили для ошибок валидации Final Form */
+.form-group .error-message {
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 3px solid #ff4d4d;
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-5px);
+    overflow: hidden;
+    transition: 
+      opacity 0.3s ease,
+      max-height 0.3s ease,
+      transform 0.3s ease;
+  }
+  
+  .form-group.invalid .error-message {
+    opacity: 1;
+    max-height: 50px;
+    transform: translateY(0);
+  }
+  
+  /* Анимация только для появления */
+  @keyframes error-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* При первой ошибке - анимация, при последующих - переход */
+  .form-group .error-message:not(.shown) {
+    animation: error-appear 0.3s ease-out forwards;
+  }
+  
+  .form-group .error-message.shown {
+    opacity: 1;
+    max-height: 50px;
+    transform: translateY(0);
+  }
