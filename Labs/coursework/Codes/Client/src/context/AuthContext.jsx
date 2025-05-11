@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
         // Сброс заголовков axios
         delete axiosInstance.defaults.headers.common['Authorization'];
     }
-};
+  };
 
   useEffect(() => {
       const checkAuth = async () => {

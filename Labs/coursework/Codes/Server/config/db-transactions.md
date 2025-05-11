@@ -1,7 +1,7 @@
 # Документация по работе таблиц для транзакций
 ## Основные таблицы
 
-### Создание таблиц
+### 1. Создание таблиц
 ```sql
 -- Кинотеатральные залы
 CREATE TABLE halls (
@@ -45,4 +45,46 @@ CREATE TABLE transactions (
     amount DECIMAL(10,2) NOT NULL,
     type VARCHAR(20) NOT NULL CHECK(type IN ('purchase', 'refund')),
     created_at TIMESTAMP DEFAULT NOW()
-); ```
+); 
+```
+
+### 2. Работа с API
+```javascript
+// Получение сеансов для фильма
+app.get('/api/movies/:id/screenings', async (req, res) => {
+    try {
+        const screenings = await db.getMovieScreenings(req.params.id);
+        res.json({ success: true, data: screenings });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Получение информации о зале и местах
+app.get('/api/screenings/:id/seats', async (req, res) => {
+    try {
+        const { seats, hall } = await db.getScreeningSeats(req.params.id);
+        res.json({ success: true, seats, hall });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Покупка билетов
+app.post('/api/tickets/purchase', authMiddleware, async (req, res) => {
+    try {
+        const { screeningId, seats, total } = req.body;
+        
+        const result = await db.purchaseTickets({
+            userId: req.user.id,
+            screeningId,
+            seats,
+            total
+        });
+        
+        res.json({ success: true, tickets: result });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+});
+```

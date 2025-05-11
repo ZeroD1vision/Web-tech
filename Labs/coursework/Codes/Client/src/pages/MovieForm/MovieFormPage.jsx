@@ -57,7 +57,7 @@ const MovieFormPage = () => {
                 behavior: 'smooth'
             });
         }
-};
+    };
     
     useEffect(() => {
         // Загрузка списка жанров
