@@ -18,16 +18,19 @@ const instance = axios.create({
 instance.interceptors.response.use(
   response => response,
   async error => {
-    const originalRequest = error.config;
-    
-    // Обрабатываем код 419 (просроченный токен)
-    if (error.response?.status === 419 && !originalRequest._retry) {
+    // Пропускаем обработку ошибок для страницы логина
+    if (window.location.pathname === '/login') {
+      return Promise.reject(error);
+    }
+
+    // Обработка просроченного access token
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {
         // Отправляем запрос на обновление токенов
-        const response = await instance.post(
-          '/api/auth/refresh', 
+        await instance.post(
+          '/auth/refresh', 
           {}, 
           { withCredentials: true }
         );
@@ -38,12 +41,16 @@ instance.interceptors.response.use(
         // localStorage.setItem('refreshToken', response.data.refreshToken);
 
         // originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
+        
+        // Повторяем исходный запрос с новым токеном
         return instance(originalRequest);
       } catch (refreshError) {
         // localStorage.removeItem('accessToken');
         // localStorage.removeItem('refreshToken');
         // Перенаправляем на логин при ошибке обновления
-        window.location.href = '/login';
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login?session_expired=1';
+        }
         return Promise.reject(refreshError);
       }
     }

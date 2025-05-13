@@ -30,40 +30,61 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-        await axiosInstance.post('/auth/logout', {}, { withCredentials: true });
+      await axiosInstance.post('/auth/logout', {}, { withCredentials: true });
+      
+      // Очистка клиентского состояния
+      setUser(null);
+      
+      // Принудительная очистка кук
+      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    
+    window.location.href = '/login';
     } catch (e) {
-        console.error('Logout error:', e);
-    } finally {
-        setUser(null);
-        // Сброс заголовков axios
-        delete axiosInstance.defaults.headers.common['Authorization'];
+      console.error('Logout error:', e);
+      window.location.href = '/login';
     }
   };
 
   useEffect(() => {
-      const checkAuth = async () => {
-        try {
-          const { data } = await axiosInstance.get('/users/me',
-            { withCredentials: true }
-          );
-          setUser(data.user);
-        } catch (error) {
-          try {
-            const { data } = axiosInstance.post('/auth/refresh', 
-              {}, 
-              { withCredentials: true }
-            );
-            setUser(data.user);
-          } catch (refreshError) {
-            logout();
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    // Не проверяем аутентификацию на странице логина
+    if (window.location.pathname === '/login') {
+      setIsLoading(false);
+      return;
+    }
 
-      checkAuth();
-    }, []);
+    const checkAuth = async () => {
+      try {
+        const { data } = await axiosInstance.get('/users/me',
+          { withCredentials: true }
+        );
+        setUser(data.user);
+      } catch (error) {
+        if (error.response?.status === 401) {
+          // Не пытаемся обновлять токен на странице входа
+          if (!window.location.pathname.includes('/login')) {
+            try {
+                await axiosInstance.post('/auth/refresh');
+                const { data } = await axiosInstance.get('/users/me');
+                setUser(data.user);
+            } catch (refreshError) {
+                logout();
+            }
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (user && window.location.pathname === '/login') {
+      navigate('/profile');
+    }
+  }, [user]);
 
   // const logout = () => {
   //   localStorage.removeItem('accessToken');

@@ -5,6 +5,13 @@ const db = require('../config/db');
 const JWT_SECRET = process.env.JWT_SECRET || '911onelove9111';
 const SALT_ROUNDS = 10;
 
+const getCookieOptions = () => ({
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    path: '/'
+  });
+
 const generateTokens = (user) => {
     const accessToken = jwt.sign(
         { 
@@ -46,20 +53,38 @@ const refreshToken = async (req, res) => {
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
         const user = await db.findUserById(decoded.id);
 
-        if (!user) throw new Error('Пользователь не найден');
+        if (!user) {
+            return res.status(401).json({ success: false });
+        }
 
-        const { newAccessToken, refreshToken: newRefreshToken } = generateTokens(user);
+        const { accessToken, refreshToken: newRefresh } = generateTokens(user);
+
+        // Общие настройки для кук
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+            path: "/",
+            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined
+        };
 
         // Обновляем куки
-        res.cookie('accessToken', newAccessToken, { /* options */ });
-        res.cookie('refreshToken', newRefreshToken, { /* options */ });
-        
-        res.json({ success: true });
-    } catch (error) {
-        res.status(401).json({ 
-            success: false,
-            message: 'Недействительный refresh токен' 
+        res.cookie('accessToken', accessToken, {
+            ...cookieOptions,
+            maxAge: 15 * 60 * 1000 // 15 минут
         });
+
+        res.cookie('refreshToken', newRefresh, {
+            ...cookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 дней
+        });
+        
+        return res.json({ success: true });
+    } catch (error) {
+        // Очищаем куки при ошибке
+        res.clearCookie('accessToken', getCookieOptions());
+        res.clearCookie('refreshToken', getCookieOptions());
+        return res.status(401).json({ success: false });
     }
 };
 
@@ -99,7 +124,7 @@ const registerUser = async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
             path: "/",
-            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
+            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined,
             maxAge: 15 * 60 * 1000 // 15 минут
         });
 
@@ -108,7 +133,7 @@ const registerUser = async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
             path: "/",
-            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
+            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined,
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 дней
         });
 
@@ -208,18 +233,14 @@ const loginUser = async (req, res) => {
 
 
 const logoutUser = async (req, res) => {
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Должно совпадать с настройками при установке
-        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-        path: '/',
-        domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost'
-    };
-
-    res.clearCookie('refreshToken', cookieOptions);
+    const cookieOptions = getCookieOptions();
     res.clearCookie('accessToken', cookieOptions);
-    
-    res.json({ success: true, message: 'Вы вышли из аккаунта' });
+    res.clearCookie('refreshToken', cookieOptions);
+    res.json({ 
+        success: true, 
+        message: 'Вы вышли из аккаунта', 
+        clearStorage: true 
+    });
 };
 
 
