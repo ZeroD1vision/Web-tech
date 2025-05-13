@@ -125,16 +125,26 @@
     border: 1px solid rgba(197, 166, 66, 0.2);
     border-radius: 8px;
     color: #c5b682;
+    background-color: #13120f !important;
     font-size: 1rem;
-    transition: all 0.3s ease;
+    transition: background-color 5000s ease-in-out 0s !important; /* Фикс мерцания */
 }
 
 .auth-form input:focus {
-    outline: none;
+    background-color: #100c0188 !important; /* Прозрачный фон */
+    outline: none !important; /* Убрать outline */
     border-color: #c5a642;
     box-shadow: 0 0 15px rgba(197, 166, 66, 0.3);
 }
 
+/* Для Chrome автозаполнения */
+.auth-form input:-webkit-autofill,
+.auth-form input:-webkit-autofill:hover, 
+.auth-form input:-webkit-autofill:focus,
+.auth-form input:-webkit-autofill:active {
+    -webkit-background-origin: 0 0 0 1000px #120f04 inset !important;
+    -webkit-text-fill-color: #c5b682 !important;
+}
 /* Submit Button */
 .auth-form button {
     width: 100%;
