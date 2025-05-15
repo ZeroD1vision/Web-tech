@@ -236,10 +236,13 @@ return (
         >
           Удалить аккаунт
         </button>
+        <div>
+          <button className="quit" onClick={handleLogout}>Выйти</button>
+        </div>
       </div>
     )}
     
-    <button className="quit" onClick={handleLogout}>Выйти</button>
+    
   </div>
 )};
 

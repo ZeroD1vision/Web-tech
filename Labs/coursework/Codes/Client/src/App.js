@@ -86,7 +86,7 @@ const PageTitle = () => {
 };
 
 
-const RequireAuth = ({ children }) => {
+const RequireAuth = ({ children, allowedRoles = [] }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
@@ -96,6 +96,10 @@ const RequireAuth = ({ children }) => {
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   return children;
@@ -164,15 +168,32 @@ function AppContent() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/movies/:id" element={<MoviePage />} />
         {/*Для админов*/}
-        <Route path="/movies/new" element={<MovieFormPage />} />
-        <Route path="/movies/:id/edit" element={<MovieFormPage />} />
+        <Route 
+          path="/movies/new" 
+          element={
+            <RequireAuth allowedRoles={['admin']}>
+              <MovieFormPage />
+            </RequireAuth>
+          } 
+        />
+        <Route 
+          path="/movies/:id/edit" 
+          element={
+            <RequireAuth allowedRoles={['admin']}>
+              <MovieFormPage />
+            </RequireAuth>
+          } 
+        />
         {/*Несуществующие пути*/}
-        <Route path="*" element={
-          <div className="error-page">
-            <h2>404 - Страница не найдена</h2>
-            <Link to="/" className="nav-link">Вернуться на главную</Link>
-          </div>
-        } />
+        <Route 
+          path="*" 
+          element={
+            <div className="error-page">
+              <h2>404 - Страница не найдена</h2>
+              <Link to="/" className="nav-link">Вернуться на главную</Link>
+            </div>
+          } 
+        />
       </Routes>
 
       <footer className="app-footer">

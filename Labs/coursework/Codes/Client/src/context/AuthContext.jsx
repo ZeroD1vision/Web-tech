@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axiosInstance from '../api/axiosInstance';
+import React from 'react';
 
 const AuthContext = createContext();
 
@@ -39,7 +40,7 @@ export const AuthProvider = ({ children }) => {
       document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     
-    window.location.href = '/login';
+      window.location.href = '/login';
     } catch (e) {
       console.error('Logout error:', e);
       window.location.href = '/login';
@@ -64,11 +65,11 @@ export const AuthProvider = ({ children }) => {
           // Не пытаемся обновлять токен на странице входа
           if (!window.location.pathname.includes('/login')) {
             try {
-                await axiosInstance.post('/auth/refresh');
-                const { data } = await axiosInstance.get('/users/me');
-                setUser(data.user);
+              await axiosInstance.post('/auth/refresh');
+              const { data } = await axiosInstance.get('/users/me');
+              setUser(data.user);
             } catch (refreshError) {
-                logout();
+              logout();
             }
           }
         }
@@ -140,7 +141,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
-        {children}
+      {children}
     </AuthContext.Provider>
   );
 
@@ -152,9 +153,9 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-      throw new Error('useAuth должен использоваться внутри AuthProvider');
-    }
-    return context;
-  };
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth должен использоваться внутри AuthProvider');
+  }
+  return context;
+};
