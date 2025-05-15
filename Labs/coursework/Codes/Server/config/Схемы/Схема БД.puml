@@ -1,0 +1,110 @@
+@startuml
+!define ER_DIAGRAM
+
+hide circle
+skinparam linetype ortho
+skinparam package {
+  BackgroundColor #F0F8FF
+  BorderColor #4682B4
+}
+
+' Сущности
+entity user_levels {
+  *id : SERIAL
+  --
+  *name : VARCHAR(50)
+}
+
+entity users {
+  *id : SERIAL
+  --
+  level_id : INT
+  credits : DECIMAL(10,2)
+}
+
+entity movies {
+  *id : SERIAL
+  --
+  *title : VARCHAR(255)
+}
+
+entity genres {
+  *id : SERIAL
+  --
+  *name : VARCHAR(50)
+}
+
+entity movie_genres {
+  *movie_id : INT
+  *genre_id : INT
+}
+
+entity halls {
+  *id : SERIAL
+  --
+  *name : VARCHAR(100)
+}
+
+entity screenings {
+  *id : SERIAL
+  --
+  movie_id : INT
+  hall_id : INT
+  *start_time : TIMESTAMP
+}
+
+entity seats {
+  *id : SERIAL
+  --
+  hall_id : INT
+  *row : INT
+  *number : INT
+}
+
+entity tickets {
+  *id : UUID
+  --
+  user_id : INT
+  screening_id : INT
+  seat_id : INT
+}
+
+' Связи
+' 1:N
+users }o--|| user_levels : level_id
+
+' N:M (через ассоциативную сущность)
+movies ||--o{ movie_genres
+genres ||--o{ movie_genres
+
+' 1:N
+halls ||--o{ screenings : hall_id
+movies ||--o{ screenings : movie_id
+
+' 1:N
+halls ||--o{ seats : hall_id
+
+' 1:N
+screenings ||--o{ tickets : screening_id
+users ||--o{ tickets : user_id
+seats ||--o{ tickets : seat_id
+
+' Группировка
+package "User System" {
+  [user_levels]
+  [users]
+}
+
+package "Movie System" {
+  [movies]
+  [genres]
+  [movie_genres]
+}
+
+package "Cinema System" {
+  [halls]
+  [screenings]
+  [seats]
+  [tickets]
+}
+@enduml

@@ -20,7 +20,7 @@ const generateTokens = (user) => {
           username: user.username
         },
         process.env.JWT_SECRET,
-        { expiresIn: '15m' }
+        { expiresIn: '60m' }
       );
     
     const refreshToken = jwt.sign(
@@ -71,7 +71,7 @@ const refreshToken = async (req, res) => {
         // Обновляем куки
         res.cookie('accessToken', accessToken, {
             ...cookieOptions,
-            maxAge: 15 * 60 * 1000 // 15 минут
+            maxAge: 60 * 60 * 1000 // 60 минут
         });
 
         res.cookie('refreshToken', newRefresh, {
@@ -125,7 +125,7 @@ const registerUser = async (req, res) => {
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
             path: "/",
             domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined,
-            maxAge: 15 * 60 * 1000 // 15 минут
+            maxAge: 60 * 60 * 1000 // 60 минут
         });
 
         res.cookie('refreshToken', refreshToken, {
@@ -201,7 +201,7 @@ const loginUser = async (req, res) => {
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', // "None" на "Lax" для локальной разработки
             path: "/",
             domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost',
-            maxAge: 15 * 60 * 1000 // 15 минут
+            maxAge: 60 * 60 * 1000 // 60 минут
         });
 
         res.cookie('refreshToken', refreshToken, {

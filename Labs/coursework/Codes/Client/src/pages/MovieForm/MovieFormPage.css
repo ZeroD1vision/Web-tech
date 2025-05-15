@@ -110,6 +110,8 @@
 /* Анимация увеличения */
 .genre-checkbox input:checked {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-color: #ffd700;
+    background: rgba(197, 166, 66, 0.1);
 }
 
 /* Скрытие нативного чекбокса */
@@ -156,16 +158,29 @@
 .form-group.invalid textarea,
 .form-group.invalid .genres-select {
     border-color: #ff4d4d;
+    border-radius: 6px;
     box-shadow: 0 0 8px rgba(255, 77, 77, 0.2);
 }
 
+@keyframes error-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .error-message {
-    display: block;
-    color: #ff8080;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-    padding-left: 0.5rem;
-    border-left: 3px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 12px;
+    margin-top: 8px;
+    background: rgba(255, 77, 77, 0.1);
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    border-radius: 6px;
+    animation: error-appear 0.3s ease-out;
 }
 
 .genre-checkbox.invalid {
