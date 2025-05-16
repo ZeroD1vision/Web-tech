@@ -8,6 +8,12 @@ import { NotificationProvider } from '../../context/NotificationContext';
 import { AuthProvider } from '../../context/AuthContext';
 
 // Мокируем зависимости
+jest.mock('axios', () => ({
+    create: jest.fn(() => ({
+      get: jest.fn(),
+      post: jest.fn()
+    }))
+  }));
 jest.mock('../../context/AuthContext');
 jest.mock('../../context/NotificationContext');
 jest.mock('../../services/movieService');
@@ -18,10 +24,10 @@ test('dummy test', () => {
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useNavigate: () => mockNavigate,
-  useParams: () => ({ id: null }),
-}));
+    ...jest.requireActual('react-router-dom'),
+    useNavigate: () => jest.fn(),
+    useParams: () => ({ id: null })
+  }));
 
 describe('MovieFormPage Component', () => {
     const mockUser = { role: 'admin' };

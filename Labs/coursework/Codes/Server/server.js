@@ -82,7 +82,10 @@ const authMiddleware = (req, res, next) => {
     // const token = req.headers.authorization?.split(' ')[1];
     // console.log('Полученный токен:', token);
     
-    if(!token) return res.status(401).json({ message: 'Требуется авторизация' });
+    if (!token) {
+        console.log('Токен отсутствует');
+        return res.status(401).json({ message: 'Требуется авторизация' });
+    }
 
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -329,6 +332,7 @@ app.get('/api/movies/:id', async (req, res) => {
 app.post('/api/movies', authMiddleware, isAdmin, movieValidation, handleValidation, async (req, res) => {
     try {
         const { genres, ...movieData } = req.body;
+        console.log(movieData);
         const newMovie = await db.createMovie(movieData);
         
         if(genres?.length) {
