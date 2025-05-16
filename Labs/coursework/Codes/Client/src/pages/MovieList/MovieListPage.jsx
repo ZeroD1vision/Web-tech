@@ -78,15 +78,9 @@ const MovieListPage = () => {
 
     useEffect(() => {
         loadMovies();
-    }, [filters]); // Пустой массив зависимостей, чтобы эффект выполнялся только при монтировании
+    }, [filters]);
 
     const handleDelete = async (movieId) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            showNotification('Требуется авторизация', 'error');
-            return;
-        }
-
         if(!window.confirm('Вы уверены, что хотите удалить этот фильм?')) return;
 
         try {
@@ -140,8 +134,9 @@ const MovieListPage = () => {
                         >
                             {movie.image ? (
                                 <img 
-                                    src={movie.image} 
-                                    alt={movie.title}
+                                    src={`${movie.image}`} 
+                                    alt={movie.title} 
+                                    className="movie-poster"
                                     onError={(e) => {
                                         e.target.src = '/placeholder.jpg';
                                         e.target.onerror = null;
@@ -181,6 +176,7 @@ const MovieListPage = () => {
                                             handleEdit(movie.id);
                                         }}
                                         title="Редактировать"
+                                        disabled={!user}
                                     >
                                         <svg className="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                             <path d="M13.5 6.5L17.5 10.5M4 20H8L18.5 9.5C19.0304 8.96957 19.3284 8.25018 19.3284 7.5C19.3284 6.74982 19.0304 6.03043 18.5 5.5C17.9696 4.96957 17.2502 4.67157 16.5 4.67157C15.7498 4.67157 15.0304 4.96957 14.5 5.5L4 16V20Z"/>
@@ -194,6 +190,7 @@ const MovieListPage = () => {
                                             handleDelete(movie.id);
                                         }}
                                         title="Удалить"
+                                        disabled={!user}
                                     >
                                         <svg className="trash-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                             <path d="M3 6H5H21"/>

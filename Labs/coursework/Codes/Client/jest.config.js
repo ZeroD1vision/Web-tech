@@ -1,14 +1,8 @@
 module.exports = {
-    testEnvironment: 'jsdom',
-    setupFilesAfterEnv: ['<rootDir>/src/setupTests.cjs'],
-    transform: {
-      '^.+\\.(js|jsx)$': 'babel-jest',
-    },
-    moduleNameMapper: {
-      '\\.(css|scss)$': 'identity-obj-proxy',
-      '^@/(.*)$': '<rootDir>/src/$1'
-    },
-    transformIgnorePatterns: [
-      '/node_modules/(?!react-router|react-redux)'
-    ]
-  };
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setupTests.js'],
+  moduleNameMapper: {
+    '\\.(css|scss)$': 'identity-obj-proxy',
+    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/src/__tests__/mocks/fileMock.js'
+  }
+};

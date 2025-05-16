@@ -83,6 +83,8 @@ const MovieFormPage = () => {
 
                 setInitialValues({
                   ...movie,
+                  image: '', // Добавляем
+                  position: 0, // Добавляем
                   genres: validGenres
                 });
               }
@@ -96,15 +98,17 @@ const MovieFormPage = () => {
         if (user?.role === 'admin') fetchData();
     }, [id, user]);
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async (formData) => {
         try {
-          const payload = {
-            ...values,
-            release_year: parseInt(values.release_year),
-            genres: values.genres || []
-          };
+          if (submitting) return; // Блокировка кнопки
 
-          console.log('Submit Movie data:', payload);
+          const payload = {
+            ...formData,
+            release_year: parseInt(formData.release_year),
+            position: parseInt(formData.position) || 0
+        };
+
+        console.log('Submit payload:', payload);
 
           console.log('Current user:', user);
 
@@ -191,12 +195,13 @@ const MovieFormPage = () => {
                   <Field name="release_year" parse={Number}>
                     {({ input, meta }) => (
                       <div className={`form-group ${meta.error && meta.touched ? 'invalid' : ''}`}>
-                        <label htmlFor="title">Год выпуска</label>
+                        <label htmlFor="release_year">Год выпуска</label>
                         <input
                           {...input}
                           type="number"
                           min="1888"
                           max={new Date().getFullYear() + 5}
+                          data-test="release-year"
                         />
                         {meta.error && meta.touched && (
                           <div className="error-message">{meta.error}</div>
@@ -208,10 +213,13 @@ const MovieFormPage = () => {
                   <Field name="trailerid">
                     {({ input, meta }) => (
                       <div className={`form-group ${meta.error && meta.touched ? 'invalid' : ''}`}>
-                        <label htmlFor="title">Идентификатор трейлера</label>
+                        <label htmlFor="movie_trailerid">Идентификатор трейлера</label>
                         <input
                           {...input}
+                          id="movie_trailerid"
                           type="text"
+                          placeholder="Идентификатор трейлера"
+                          data-test="trailer-id"
                         />
                         {meta.error && meta.touched && (
                           <div className="error-message">{meta.error}</div>
@@ -254,6 +262,36 @@ const MovieFormPage = () => {
                       </div>
                     )}
                   </Field>
+
+                  <Field name="image">
+                    {({ input, meta }) => (
+                      <div className={`form-group ${meta.error && meta.touched ? 'invalid' : ''}`}>
+                        <label>URL изображения</label>
+                        <input
+                          {...input}
+                          type="text"
+                          placeholder="/image.jpg"
+                        />
+                        {meta.error && meta.touched && (
+                      <div className="error-message">{meta.error}</div>
+                        )}
+                      </div>
+                    )}
+                  </Field>
+
+                  <Field name="position" parse={Number}>
+  {({ input, meta }) => (
+    <div className={`form-group ${meta.error && meta.touched ? 'invalid' : ''}`}>
+      <label>Позиция в списке</label>
+      <input
+        {...input}
+        type="number"
+        min="0"
+      />
+      {meta.error && meta.touched && <div className="error-message">{meta.error}</div>}
+    </div>
+  )}
+</Field>
                   
                   <div className="form-actions">
                     <button

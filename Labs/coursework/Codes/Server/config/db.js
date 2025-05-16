@@ -203,7 +203,7 @@ const deleteUserById = async (userId) => {
 
 
 const createMovie = async (movieData) => {
-    const { title, description, image, trailerid, position } = movieData;
+    const { title, description, image, trailerid, position, release_year } = movieData;
     const query = `
         INSERT INTO movies 
             (title, 
@@ -211,18 +211,19 @@ const createMovie = async (movieData) => {
             image, 
             trailerid, 
             position,
-            release_year = $6)
+            release_year)
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
     `;
     const values = [
         title, 
         description, 
-        image, 
+        image || null, 
         trailerid, 
         position || 0,
         release_year ? parseInt(release_year) : null
     ];
+    
 
     try {
         const result = await pool.query(query, values);

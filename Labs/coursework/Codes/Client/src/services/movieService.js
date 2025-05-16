@@ -26,7 +26,10 @@ export const deleteMovie = async (movieId) => {
         credentials: 'include' // Только куки
     });
     
-    if (!response.ok) throw new Error('Ошибка удаления фильма');
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Ошибка удаления фильма');
+    }
     return response.json();
 };
 

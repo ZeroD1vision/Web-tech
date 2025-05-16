@@ -38,12 +38,6 @@ const MoviePage = () => {
     }, [id]);
 
     const handleDelete = async (id) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            showNotification('Требуется авторизация', 'error');
-            return;
-        }
-
         if(!window.confirm('Вы уверены, что хотите удалить этот фильм?')) return;
 
         try {
@@ -168,6 +162,7 @@ const MoviePage = () => {
                         <button 
                             className="delete-form-btn"
                             onClick={() => handleDelete(id)}
+                            disabled={!user}
                         >
                             Удалить
                         </button>
