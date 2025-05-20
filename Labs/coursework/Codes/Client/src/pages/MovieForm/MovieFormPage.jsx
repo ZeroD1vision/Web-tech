@@ -100,7 +100,7 @@ const MovieFormPage = () => {
 
     const handleSubmit = async (formData) => {
         try {
-          if (submitting) return; // Блокировка кнопки
+          
 
           const payload = {
             ...formData,
