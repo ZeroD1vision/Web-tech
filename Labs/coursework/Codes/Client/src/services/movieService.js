@@ -1,10 +1,8 @@
-const API_URL = 'http://localhost:3000/api/movies';
+import axiosInstance from '../api/axiosInstance' 
 
 export const fetchMovies = async () => {
     try {
-        const response = await fetch(API_URL, {
-            credentials: 'include' // Добавляем для передачи кук
-        });
+        const response = await axiosInstance.get('/movies');
         
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
@@ -18,13 +16,7 @@ export const fetchMovies = async () => {
 
 
 export const deleteMovie = async (movieId) => {
-    const response = await fetch(`${API_URL}/${movieId}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include' // Только куки
-    });
+    const response = await axiosInstance.delete(`/movies/${movieId}`);
     
     if (!response.ok) {
         const errorData = await response.json();
@@ -34,9 +26,7 @@ export const deleteMovie = async (movieId) => {
 };
 
 export const getMovieById = async (id) => {
-    const response = await fetch(`${API_URL}/${id}`, {
-        credentials: 'include' // Добавляем куки
-    });
+    const response = await axiosInstance.get(`/movies/${id}`);
     
     if(!response.ok) throw new Error('Фильм не найден');
     
@@ -45,14 +35,7 @@ export const getMovieById = async (id) => {
 };
 
 export const createMovie = async (movieData) => {
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include', // Только куки
-        body: JSON.stringify(movieData) // Убрать selectedGenres
-    });
+    const response = await axiosInstance.post('/movies', movieData)
 
     if (response.status === 403) throw new Error('Доступ запрещен');
     if (!response.ok) throw new Error('Ошибка создания фильма');
@@ -61,14 +44,7 @@ export const createMovie = async (movieData) => {
 };
 
 export const updateMovie = async (id, movieData) => {
-    const response = await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include', // Добавляем куки
-        body: JSON.stringify(movieData)
-    });
+    const response = await axiosInstance.put(`/movies/${id}`, movieData);
 
     if (response.status === 403) throw new Error('Доступ запрещен');
     if (!response.ok) throw new Error('Ошибка обновления фильма');
@@ -84,7 +60,9 @@ export const searchMovies = async (filters) => {
     if (filters.yearFrom) params.append('yearFrom', filters.yearFrom);
     if (filters.yearTo) params.append('yearTo', filters.yearTo);
 
-    const response = await fetch(`${API_URL}/search?${params.toString()}`);
+    const response = await axiosInstance.get('/movies/search', { 
+        params: filters // axios сам делает querystring
+    })
     
     if (!response.ok) {
         throw new Error(`Ошибка поиска: ${response.status}`);

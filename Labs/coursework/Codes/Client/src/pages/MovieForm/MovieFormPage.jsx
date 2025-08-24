@@ -62,7 +62,8 @@ const MovieFormPage = () => {
         // Загрузка данных
         const fetchData = async () => {
           try {
-            const genresResponse = await fetch('http://localhost:3000/api/genres');
+            //const genresResponse = await fetch('http://localhost:3000/api/genres');
+            const response = await axiosInstance.get('/genres');
             const genresData = await genresResponse.json();
             
             if (genresData.success) {

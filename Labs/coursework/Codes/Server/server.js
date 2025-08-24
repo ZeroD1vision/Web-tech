@@ -3,14 +3,32 @@ const cors = require('cors');
 const db = require('./config/db');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const client = require('prom-client');
 const cookieParser = require('cookie-parser');
 const { body, validationResult } = require('express-validator');
 const authController = require('./controllers/authController');
 const movieController = require('./controllers/movieController');
+
 const JWT_SECRET = process.env.JWT_SECRET || '911onelove9111';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Создаем реестр метрик
+const register = new client.Registry();
+
+// Добавляем стандартные метрики Node.js
+client.collectDefaultMetrics({ register });
+
+// Метрика для времени ответа
+const httpRequestDurationMicroseconds = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Длительность HTTP-запросов в секундах',
+  labelNames: ['method', 'route', 'code'],
+  buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
+});
+register.registerMetric(httpRequestDurationMicroseconds);
+
 
 // Валидация фильмов
 const movieValidation = [
@@ -70,13 +88,49 @@ const handleValidation = (req, res, next) => {
     }
     next();
 };
+
+
+// Middleware для сбора метрик
+app.use((req, res, next) => {
+  const end = httpRequestDurationMicroseconds.startTimer();
+  res.on('finish', () => {
+    end({ 
+      method: req.method, 
+      route: req.route?.path || req.path || 'unknown', 
+      code: res.statusCode 
+    });
+  });
+  next();
+});
+
 // Middleware cookies 
 app.use(cookieParser());
 
+// Настройка CORS для безопасного взаимодействия с клиентом
+const corsOptions = {
+  origin: 'http://localhost:3001',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie'],
+  maxAge: 86400 // 24 часа
+};
+
+app.use(cors(corsOptions));
+
+// Явная обработка preflight-запросов
+app.options('/*path', cors(corsOptions), (req, res) => {
+    res.sendStatus(204);
+});
+
 // Middleware для проверки JWT
 const authMiddleware = (req, res, next) => {
+    console.log("Incoming cookies:", req.headers.cookie);
+    console.log("Parsed cookies:", req.cookies);
     console.log("Cookies:", req.cookies);
-    
+    if (req.method === 'OPTIONS') {
+      return next();
+    }
     const token = req.cookies.accessToken;
     console.log('Полученный токен из кук:', token);
     // const token = req.headers.authorization?.split(' ')[1];
@@ -108,23 +162,23 @@ const isAdmin = (req, res, next) => {
     }
     next();
 };
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
-// Настройка CORS для безопасного взаимодействия с клиентом
-app.use(cors({
-    origin: 'http://localhost:3001',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    // exposedHeaders: ['Authorization'],
-    exposedHeaders: ['set-cookie']
-}));
-
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3001');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
+app.options('/api/movies', (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3001');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(204);
 });
+
+// Эндпоинт для Prometheus
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
+
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -132,9 +186,9 @@ app.use((req, res, next) => {
     next();
   });
 
-app.use(cookieParser());
-
 app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
 
 // Аутентификация
 app.post('/api/auth/register', authController.registerUser);
@@ -142,6 +196,7 @@ app.post('/api/auth/login', authController.loginUser);
 app.post('/api/auth/refresh', authController.refreshToken);
 app.post('/api/auth/logout', authController.logoutUser);
 
+app.options('/api/users/me', cors(corsOptions));
 app.get('/api/users/me', authMiddleware, authController.getCurrentUser);
 app.put('/api/users/me', 
     authMiddleware,
@@ -194,6 +249,7 @@ app.get('/api/user-levels/:levelId', async (req, res) => {
 });
 
 // Получение всех жанров
+app.options('/api/genres', cors(corsOptions));
 app.get('/api/genres', async (req, res) => {
     try {
         const genres = await db.getAllGenres();

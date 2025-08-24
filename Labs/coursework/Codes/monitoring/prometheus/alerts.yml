@@ -1,0 +1,11 @@
+groups:
+- name: cinema-alerts
+  rules:
+  - alert: HighRequestLatency
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Высокая задержка запросов"
+      description: "95-й перцентиль задержки запросов превышает 1 секунду"

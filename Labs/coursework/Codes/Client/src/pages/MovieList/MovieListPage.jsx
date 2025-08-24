@@ -26,7 +26,8 @@ const MovieListPage = () => {
     useEffect(() => {
         const loadGenres = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/genres');
+                //const response = await fetch('http://localhost:3000/api/genres');
+                const response = await axiosInstance.get('/genres');
                 const data = await response.json();
                 if (data.success) setGenres(data.genres);
             } catch (error) {
@@ -64,7 +65,7 @@ const MovieListPage = () => {
             const moviesWithImages = moviesData.map(movie => ({
                 ...movie,
                 image: movie.image 
-                    ? `http://localhost:3000/${movie.image}`
+                    ? `${movie.image}`
                     : null
             }));
             

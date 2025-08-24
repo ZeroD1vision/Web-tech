@@ -24,6 +24,16 @@ const LoginForm = () => {
 
   const handleSubmit = async (values, form) => {
       try {
+        const response = await axiosInstance.post('/auth/login', values, { 
+            withCredentials: true 
+        });
+        console.log('Response cookies:', response.headers['set-cookie']);
+        
+        document.cookie = `accessToken=${response.data.accessToken}; path=/; domain=localhost`;
+        document.cookie = `refreshToken=${response.data.refreshToken}; path=/; domain=localhost`;
+        
+        console.log('Current cookies:', document.cookie);
+        
           await axiosInstance.post('/auth/login', values, { 
               withCredentials: true 
           });
