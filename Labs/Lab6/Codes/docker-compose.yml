@@ -1,0 +1,82 @@
+services:
+  # React клиент
+  client:
+    build: ./client
+    ports:
+      - "3001:80"
+    depends_on:
+      - server
+    networks:
+      - cinema-network
+
+  # Node.js сервер
+  server:
+    build: ./server
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - JWT_SECRET=${JWT_SECRET}
+      - REFRESH_SECRET=${REFRESH_SECRET}
+    depends_on:
+      - db
+    deploy:
+      replicas: 3
+    networks:
+      - cinema-network
+
+  # PostgreSQL база данных
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - cinema-network
+
+  # pgAdmin для управления БД (опционально)
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgres@PostgreSQL 17
+      PGADMIN_DEFAULT_PASSWORD: posgres
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - cinema-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - server
+    networks:
+      - cinema-network
+  
+   # Watchtower для автоматического обновления контейнеров
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30
+    networks:
+      - cinema-network
+
+volumes:
+  postgres_data:
+
+networks:
+  cinema-network:
+    driver: bridge

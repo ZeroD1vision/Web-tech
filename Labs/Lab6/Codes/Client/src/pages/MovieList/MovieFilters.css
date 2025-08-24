@@ -1,0 +1,205 @@
+/* Стили для контейнера фильтров */
+.movie-filters {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(19, 19, 19, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(197, 166, 66, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Группа элементов фильтра */
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    position: relative;
+}
+
+/* Стили для инпутов и селектов */
+.filter-group input,
+.filter-group select {
+    padding: 0.8rem 1.2rem;
+    background: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(197, 166, 66, 0.3);
+    border-radius: 8px;
+    color: #c6b973;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    min-width: 180px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Кастомный плейсхолдер */
+.filter-group input::placeholder {
+    color: #6b6650;
+    opacity: 1;
+}
+
+.filter-group input::placeholder {
+    color: #6b6650;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    position: relative;
+}
+
+.filter-group:focus-within::after {
+    opacity: 1;
+}
+
+/* Специфические стили для фильтра по году */
+.year-filter input {
+    width: 100px;
+    text-align: center;
+    background: rgba(30, 30, 30, 0.8);
+}
+
+/* Кнопка сброса фильтров */
+.reset-filters-btn {
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    color: #c5a642 !important;
+    border: 1px solid rgba(197, 166, 66, 0.3) !important;
+    padding: 0.9rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.reset-filters-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0px rgba(36, 27, 4, 0.2);
+    border-color: #c5a642 !important;
+}
+
+/* Эффект свечения для кнопки */
+.reset-filters-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 215, 0, 0.1),
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.reset-filters-btn:hover::after {
+    left: 100%;
+}
+
+/* Анимация границы для активного фильтра */
+@keyframes filter-glow {
+    0% { box-shadow: 0 0 5px rgba(197, 166, 66, 0.3); }
+    50% { box-shadow: 0 0 15px rgba(197, 166, 66, 0.5); }
+    100% { box-shadow: 0 0 5px rgba(197, 166, 66, 0.3); }
+}
+
+
+/* Убираем стрелки у числовых инпутов */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Стилизация скроллбара в выпадающем списке */
+.filter-group select::-webkit-scrollbar {
+    width: 8px;
+    background: rgba(30, 30, 30, 0.8);
+}
+
+.filter-group select::-webkit-scrollbar-thumb {
+    background: #c5a642;
+    border-radius: 4px;
+    border: 2px solid rgba(30, 30, 30, 0.8);
+}
+
+.filter-group select::-webkit-scrollbar-track {
+    background: rgba(30, 30, 30, 0.8);
+}
+
+/* Для Firefox */
+@supports (scrollbar-color: auto) {
+    .filter-group select {
+        scrollbar-color: #c5a642 rgba(30, 30, 30, 0.8);
+        scrollbar-width: thin;
+    }
+}
+
+/* Кастомные стрелки для select */
+.filter-group select {
+    background-image: url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c5a642'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 32px;
+}
+
+/* Убираем фокус-ринги */
+.filter-group input:focus,
+.filter-group select:focus {
+    border-color: rgb(219, 184, 67); /* Белая граница */
+    box-shadow: 
+        0 0 0 1px rgba(145, 128, 60, 0.8), /* Белая "кайма" */
+        0 0 20px rgba(168, 166, 46, 0.3); /* Размытое белое свечение */
+    outline: none;
+}
+/* Стиль для выбранного элемента */
+.filter-group select option:checked {
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    color: #ffea00d1 !important;
+    font-weight: 500;
+    position: relative;
+}
+
+/* Эффект при наведении */
+.filter-group select option:hover {
+    background: rgba(197, 166, 66, 0.2) !important;
+    cursor: pointer;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .movie-filters {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .year-filter {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .reset-filters-btn {
+        width: 100%;
+        text-align: center;
+    }
+}

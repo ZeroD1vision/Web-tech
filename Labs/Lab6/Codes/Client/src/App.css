@@ -1,0 +1,204 @@
+/* Глобальный фон */
+body {
+  z-index: 0;
+}
+
+/* Контент */
+.app-content {
+  z-index: 1;
+}
+
+/* Эффекты карточек */
+.movie-card::after {
+  z-index: -1;
+}
+
+/* Фон всего приложения */
+.app-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(
+    45deg,
+    rgba(29, 25, 13, 0.95) 0%,
+    rgba(139, 115, 34, 0.9) 100%,
+    rgba(63, 63, 63, 0.85) 100%,
+    rgba(62, 46, 5, 0.9) 50%
+  );
+  pointer-events: none; /* Чтобы не перекрывал клики */
+}
+
+/* Для эффекта "вуали" поверх градиента */
+.app-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(197, 166, 66, 0.15) 0%,
+    rgba(0, 0, 0, 0.9) 70%
+  );
+}
+
+/* Анимация фона для динамики */
+@keyframes background-pulse {
+  0% { opacity: 0.95; }
+  50% { opacity: 0.98; }
+  100% { opacity: 0.95; }
+}
+
+.app-background {
+  animation: background-pulse 15s infinite ease-in-out;
+}
+
+/**/
+
+body {
+  background: #0a0a0a; /* Основной темный фон сайта */
+  margin: 0;
+  color: #ffffff; /* Базовый цвет текста */
+}
+
+/* Основные стили навигации */
+.app-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(0);
+  z-index: 1000;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease;
+  opacity: 1;
+  background: #000000; /* Основной цвет фона как у контейнера */
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.688); /* Более выраженная тень */
+  border-bottom: 1px solid #2a2a2a; /* Акцентная линия */
+}
+
+/* Убираем все эффекты прозрачности */
+.app-nav--hidden {
+  transform: translateY(-100%);
+  transition: transform 0.36s ease-in-out;
+}
+
+.app-nav--visible {
+  transform: translateY(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+.app-container {
+  padding-top: 60px; /* Перенести сюда отступ */
+}
+
+/* Для логотипа добавляем эффекты в стиле общего дизайна */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #c1a856; /* Золотой цвет как в заголовках */
+  text-decoration: none;
+  transition: filter 0.3s ease;
+}
+
+.logo-image {
+  height: 50px; /* Высота лого */
+  margin-right: 30px; /* Отступ */
+  object-fit: contain; /* Сохраняет пропорции лого */
+  filter: drop-shadow(0 0 5px rgba(197, 166, 66, 0.3));
+}
+
+.nav-logo:hover {
+  filter: brightness(1.3);
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+/* Стили для ссылок с эффектом свечения */
+.nav-link {
+  color: #c6c6c6;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 8px 15px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #f5ef54;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: #ffd700;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 70%;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+  .app-nav {
+    padding: 8px 15px;
+  }
+  
+  .nav-links {
+    gap: 15px;
+  }
+  
+  .nav-link {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+}
+
+/* Стили футера */
+.app-footer {
+  padding: 20px;
+  background: #1a1a1a;
+  color: white;
+  margin-top: 50px;
+  text-align: center;
+}
+
+.footer-links {
+  margin-top: 10px;
+}
+
+.footer-link {
+  color: #ababab;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.footer-link:hover {
+  color: #f5ef54;
+}
+
+/* Стили страницы 404 */
+.error-page {
+  padding: 40px;
+  text-align: center;
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

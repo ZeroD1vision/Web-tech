@@ -1,0 +1,17 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Копируем только нужные файлы
+COPY Server/server-socket-multi-thread.py /app/
+COPY requirements.txt /app/
+
+# Установка зависимостей
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+# Создаем директорию для логов
+RUN mkdir logs
+# Открываем порт сервера
+EXPOSE 2371
+
+# Исправляем команду запуска
+CMD ["python", "server-socket-multi-thread.py"]

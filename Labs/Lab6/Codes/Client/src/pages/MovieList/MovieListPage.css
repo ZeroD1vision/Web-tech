@@ -1,0 +1,268 @@
+/* Основные стили */
+.movie-list-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(19, 19, 19, 0.85); /* Добавляем прозрачность */
+    backdrop-filter: blur(8px); /* Эффект матового стекла */
+    border: 1px solid rgba(197, 166, 66, 0.1); /* Тонкая золотая рамка */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Глубокая тень */
+    min-height: 100vh;
+    transition: all 0.5s ease;
+}
+
+h1 {
+    text-align: center;
+    background: linear-gradient(45deg, #aa9e51, #c5a642, #ffd700);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 2.5rem;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+    position: relative;
+    padding-bottom: 15px;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+}
+
+/* Загрузка */
+.loading-container, .error-container {
+    background: #111;
+}
+
+.spinner {
+    border: 5px solid #2a2a2a;
+    border-top: 5px solid #ffd700;
+}
+/* Сетка карточек фильмов */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.movie-card {
+    background: #101401;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(161, 161, 16, 0.3);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(220, 195, 53, 0.786);
+    box-shadow: 0 8px 25px rgba(255, 217, 0, 0.1);
+}
+
+/* Эффект подсветки при наведении */
+.movie-card:hover::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 14px;
+    background: linear-gradient(
+      45deg, 
+      rgba(15, 14, 5, 0.658), 
+      rgba(39, 34, 5, 0.941),
+      rgba(70, 66, 15, 0.941),
+      transparent 90%
+    );
+    z-index: -1;
+    animation: 3s ease-in-out infinite;
+  }
+
+.movie-poster {
+    height: 400px;
+    background: #000;
+    position: relative;
+    border-bottom: 1px solid #80831da6;
+}
+
+.movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-placeholder {
+    background: #000;
+    color: #ffd700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.movie-info {
+    padding: 15px;
+}
+
+.movie-info h3 {
+    color: #c6b973;
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+    position: relative;
+    display: inline-block;
+}
+
+.movie-info h3::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100px;
+    height: 1px;
+    background: linear-gradient(90deg, #ffd700, transparent);
+    animation: card-glow 3s infinite
+}
+
+@keyframes card-glow {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+}
+
+.description {
+    color: #c6c6c6;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px; 
+}
+/* Кнопка трейлера */
+.trailer-btn {
+    position: relative;
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    color: #b39a4b !important;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 16px;
+    font-weight: 650;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Плавное фоновое свечение */
+.trailer-btn::before {
+    border-radius: 16px;
+    content: '';
+    position: absolute;
+    top: 0.2px;
+    left: 1px;
+    width: 100%;
+    height: 102%;
+    background: linear-gradient(45deg, #c5a642, #ffd700);
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+/* Эффекты при наведении */
+.trailer-btn:hover {
+    transform: translateY(-2px);
+}
+
+.trailer-btn:hover::before {
+    opacity: 0.5;
+}
+
+/* Плавная анимация границы */
+.trailer-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(255, 234, 0, 0.304);
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.trailer-btn:hover::after {
+    border-radius: 16px;
+    opacity: 0;
+}
+
+/* Кнопки администратора*/
+.admin-actions-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.admin-actions-overlay button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background: rgba(22, 20, 10, 0.789);
+    backdrop-filter: blur(2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-actions-overlay button:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: #ffd700;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+.edit-btn .edit-icon {
+    stroke: #ffd700;
+    filter: drop-shadow(0 0 2px rgba(255, 217, 0, 0.537));
+}
+
+.delete-btn .trash-icon {
+    width: 20px;
+    height: 40px;
+    stroke: #f74d4d;
+    stroke-width: 1.5;
+}
+
+/* Добавить фильм */
+.add-movie-btn {
+    background: linear-gradient(45deg, #1a1a1a, #000) !important;
+    color: #ffd700 !important;
+    border: 1px solid #ffd70033;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin: 20px auto;
+    display: block;
+}
+
+.add-movie-btn:hover {
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Анимации */
+@keyframes gradient-shine {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}

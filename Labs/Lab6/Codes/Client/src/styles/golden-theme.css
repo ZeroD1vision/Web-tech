@@ -1,0 +1,8 @@
+/* golden-theme.css 
+:root {
+    --obsidian: #0a0a0a;
+    --gold-primary: linear-gradient(45deg, #ffd700, #c5a642);
+    --gold-secondary: #ffd70066;
+    --dark-velvet: #1a1a1a;
+    --gilded-border: 1px solid var(--gold-secondary);
+  }*/

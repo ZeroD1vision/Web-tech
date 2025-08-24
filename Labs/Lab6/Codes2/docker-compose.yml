@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: server
+    ports:
+      - "2371:2371"
+    volumes:
+      - ./server_logs:/app/logs  # Монтируем директорию для логов сервера
+    networks:
+      - my-network
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: client
+    depends_on:
+      - server
+    volumes:
+      - ./client_logs:/logs  # Монтируем директорию для логов клиента
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge

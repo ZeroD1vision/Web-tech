@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/button.css">
+    <link rel="stylesheet" href="/css/links.css">
+    <link rel="stylesheet" href="/css/notifications.css">
+    <title><%= title %></title>
+</head>
+<body>
+    <h1><%= title %></h1>
+    <form id="<%= formType%>" action="<%= action %>" method="POST">
+        <input type="text" name="username" id="username" required 
+        placeholder="Имя пользователя">
+        <input type="password" name="password" id="password" required 
+        placeholder="Пароль">
+        <button type="submit" class="link-page"><%= buttonText %></button>
+    </form>
+    <p><%= linkRegLogText %>
+        <a href="<%= linkHrefRegLog %>" class="link-contact"><%= linkHrefRegLogLabel %></a>
+    </p>
+    
+    <!-- Блоки уведомлений -->
+    <div id="notification"></div>
+    <div id="error"></div>
+
+    <script type="module" defer>
+        import { loginUser  } from '/js/notifications.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('login-form').addEventListener('submit', loginUser);
+        });
+    </script>
+
+    <!-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('login-form').addEventListener('submit', loginUser  );
+
+            async function loginUser  (event) {
+                event.preventDefault(); // Предотвращаем стандартное поведение формы
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Отправка данных на сервер
+                try {
+                    const response = await fetch('/profile/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password }),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showNotification(result.message); // Успешное сообщение
+                        setTimeout(() => {
+                            window.location.href = '/profile/profile'; // Перенаправление на профиль
+                        }, 1200); // Покажем уведомление хотя бы 1.2 сек
+                    } else {
+                        showError(result.error || 'Произошла ошибка при входе.'); // Ошибка
+                    }
+                } catch (error) {
+                    showError('Произошла ошибка при отправке данных.'); // Ошибка отправки
+                }
+            }
+
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.style.display = 'block';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+
+            function showError(message) {
+                const error = document.getElementById('error');
+                error.textContent = message;
+                error.style.display = 'block';
+                setTimeout(() => {
+                    error.style.display = 'none';
+                }, 5000);
+            }
+        });
+    </script>
+    <script src="/js/notifications.js" defer></script> -->
+</body>
+</html>

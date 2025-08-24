@@ -1,0 +1,18 @@
+FROM ubuntu:22.04
+
+# Установка компилятора и зависимостей
+RUN apt-get update && \
+    apt-get install -y g++ build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Копируем файлы клиента
+COPY Client/client-socket.cpp /app/
+COPY Client/config.txt /app/
+
+# Компиляция клиента (без Windows-библиотек)
+RUN g++ -o client client-socket.cpp
+
+# Запуск трёх клиентов с задержкой перед первым запуском
+CMD bash -c 'sleep 3; for i in {1..3}; do /app/client; sleep 1; done'

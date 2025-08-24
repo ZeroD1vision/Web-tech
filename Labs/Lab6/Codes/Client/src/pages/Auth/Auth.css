@@ -1,0 +1,283 @@
+/* Auth Container */
+.auth-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 40px;
+    background: rgba(24, 24, 24, 0.811); /* Добавляем прозрачность */
+    backdrop-filter: blur(12px); /* Эффект матового стекла */
+    border-radius: 15px;
+    /* Основное размытие */
+    backdrop-filter: blur(16px) saturate(180%) brightness(115%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(115%);
+    
+    /* Градиентная рамка */
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    
+    /* Тени и свечение */
+    box-shadow: 
+        0 0 40px rgba(0, 0, 0, 0.6),
+        inset 0 0 20px rgba(255, 215, 0, 0.05);
+    
+    /* Фоновый градиент для глубины */
+    background-image: 
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.02) 0%,
+            rgba(0, 0, 0, 0.15) 100%
+        );
+    
+    /* Анимация при наведении */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Эффект "стеклянной поверхности" */
+.auth-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 15px;
+    background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.03) 0%,
+        rgba(255, 255, 255, 0.01) 100%
+    );
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Эффект свечения при наведении */
+.auth-container:hover {
+    backdrop-filter: blur(18px) saturate(200%) brightness(120%);
+    -webkit-backdrop-filter: blur(18px) saturate(200%) brightness(120%);
+    box-shadow: 
+        0 0 50px rgba(0, 0, 0, 0.7),
+        inset 0 0 30px rgba(171, 149, 22, 0.1);
+}
+
+/* Анимация градиента */
+@keyframes glass-glow {
+    0% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.4; }
+}
+
+.auth-container::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 17px;
+    background: linear-gradient(
+        45deg,
+        rgba(157, 135, 12, 0.1),
+        rgba(83, 73, 16, 0.05),
+        rgba(255, 215, 0, 0.1)
+    );
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.auth-container:hover::after {
+    opacity: 0.1;
+    animation: glass-glow 6s infinite;
+}
+
+/* Auth Form */
+.auth-form {
+    position: relative;
+    padding: 30px;
+}
+
+.auth-form h2 {
+    text-align: center;
+    background: linear-gradient(45deg, #c5a642, #ffd700);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 2.2rem;
+    margin-bottom: 35px;
+    position: relative;
+}
+
+.auth-form h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+}
+
+/* Input Fields */
+.auth-form input {
+    width: 100%;
+    padding: 14px 20px;
+    margin: 15px 0;
+    background: rgba(10, 10, 10, 0.8);
+    border: 1px solid rgba(197, 166, 66, 0.2);
+    border-radius: 8px;
+    color: #c5b682;
+    background-color: #13120f !important;
+    font-size: 1rem;
+    transition: background-color 5000s ease-in-out 0s !important; /* Фикс мерцания */
+}
+
+.auth-form input:focus {
+    background-color: #100c0188 !important; /* Прозрачный фон */
+    outline: none !important; /* Убрать outline */
+    border-color: #c5a642;
+    box-shadow: 0 0 15px rgba(197, 166, 66, 0.3);
+}
+
+/* Для Chrome автозаполнения */
+.auth-form input:-webkit-autofill,
+.auth-form input:-webkit-autofill:hover, 
+.auth-form input:-webkit-autofill:focus,
+.auth-form input:-webkit-autofill:active {
+    -webkit-background-origin: 0 0 0 1000px #120f04 inset !important;
+    -webkit-text-fill-color: #c5b682 !important;
+}
+/* Submit Button */
+.auth-form button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 25px;
+    background: linear-gradient(45deg, #3e3610, #2f2609);
+    border: 1px solid rgba(197, 166, 66, 0.3);
+    border-radius: 8px;
+    color: #c5b682;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-form button:hover {
+    background: linear-gradient(45deg, #4a4012, #3b300a);
+    border-color: #c5a642;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(197, 166, 66, 0.2);
+}
+
+.auth-form button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 215, 0, 0.1),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.auth-form button:hover::before {
+    left: 100%;
+}
+
+/* Error Message */
+.error-message {
+    color: #ff4d4d;
+    padding: 12px;
+    margin-top: 20px;
+    background: rgba(255, 77, 77, 0.1);
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    border-radius: 6px;
+    text-align: center;
+    animation: error-pulse 1.5s infinite;
+}
+
+@keyframes error-pulse {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+
+/* Link Text */
+.auth-link {
+    text-align: center;
+    margin-top: 25px;
+    color: #c5b682;
+}
+
+.auth-link a {
+    color: #ffd700;
+    text-decoration: none;
+    position: relative;
+}
+
+.auth-link a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: #ffd700;
+    transition: width 0.3s ease;
+}
+
+.auth-link a:hover::after {
+    width: 100%;
+}
+
+
+/* Стили для ошибок валидации Final Form */
+.form-group .error-message {
+    color: #ff4d4d;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    padding-left: 0.5rem;
+    border-left: 3px solid #ff4d4d;
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-5px);
+    overflow: hidden;
+    transition: 
+      opacity 0.3s ease,
+      max-height 0.3s ease,
+      transform 0.3s ease;
+  }
+  
+  .form-group.invalid .error-message {
+    opacity: 1;
+    max-height: 50px;
+    transform: translateY(0);
+  }
+  
+  /* Анимация только для появления */
+  @keyframes error-appear {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* При первой ошибке - анимация, при последующих - переход */
+  .form-group .error-message:not(.shown) {
+    animation: error-appear 0.3s ease-out forwards;
+  }
+  
+  .form-group .error-message.shown {
+    opacity: 1;
+    max-height: 50px;
+    transform: translateY(0);
+  }

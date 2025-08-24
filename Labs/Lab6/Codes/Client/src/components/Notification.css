@@ -1,0 +1,53 @@
+.notification {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  padding: 18px 30px;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 600;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: cinematicEntry 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: all 0.3s ease;
+  max-width: 400px;
+}
+
+/* Анимация появления */
+@keyframes cinematicEntry {
+  0% {
+      transform: translateX(120%) rotate(3deg);
+      opacity: 0;
+  }
+  80% {
+      transform: translateX(-10px) rotate(-1deg);
+  }
+  100% {
+      transform: translateX(0) rotate(0);
+      opacity: 1;
+  }
+}
+  
+  @keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  
+  .success {
+    background: linear-gradient(
+        135deg,
+        rgba(46, 125, 50, 0.9),
+        rgba(76, 175, 80, 0.95)
+    );
+}
+  
+  .error {
+    background-color: #f44336;
+  }
+
+  
