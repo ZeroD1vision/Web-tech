@@ -65,7 +65,7 @@ const refreshToken = async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
             path: "/",
-            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : undefined
+            domain: process.env.NODE_ENV === 'production' ? '.yourdomain.com' : 'localhost'
         };
 
         // Обновляем куки

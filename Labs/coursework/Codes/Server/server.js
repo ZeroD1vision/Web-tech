@@ -108,7 +108,7 @@ app.use(cookieParser());
 
 // Настройка CORS для безопасного взаимодействия с клиентом
 const corsOptions = {
-  origin: 'http://localhost:3001',
+  origin: 'http://localhost:8080',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -164,7 +164,7 @@ const isAdmin = (req, res, next) => {
 };
 
 app.options('/api/movies', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3001');
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
   res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');

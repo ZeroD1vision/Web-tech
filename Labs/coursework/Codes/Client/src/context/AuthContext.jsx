@@ -65,8 +65,10 @@ export const AuthProvider = ({ children }) => {
           // Не пытаемся обновлять токен на странице входа
           if (!window.location.pathname.includes('/login')) {
             try {
-              await axiosInstance.post('/auth/refresh');
-              const { data } = await axiosInstance.get('/users/me');
+              await axiosInstance.post('/auth/refresh', {}, {withCredentials: true});
+              const { data } = await axiosInstance.get('/users/me',
+                { withCredentials: true }
+              );
               setUser(data.user);
             } catch (refreshError) {
               logout();

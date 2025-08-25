@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  // baseURL: 'http://localhost:3000/api',
-  baseURL: '/api',
+  baseURL: 'http://localhost:8080/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -34,11 +33,7 @@ instance.interceptors.response.use(
       
       try {
         // Отправляем запрос на обновление токенов
-        await instance.post(
-          '/auth/refresh', 
-          {}, 
-          { withCredentials: true }
-        );
+        await instance.post('/auth/refresh', {}, { withCredentials: true });
         // const refreshToken = localStorage.getItem('refreshToken');
         // const response = await axios.post('/api/auth/refresh', { refreshToken });
         
@@ -60,6 +55,18 @@ instance.interceptors.response.use(
       }
     }
     
+    // Обработка других ошибок
+    if (error.response) {
+      // Сервер ответил с статусом ошибки
+      console.error('Server Error:', error.response.data);
+    } else if (error.request) {
+      // Запрос был сделан, но ответ не получен
+      console.error('Network Error:', error.request);
+    } else {
+      // Произошла ошибка при настройке запроса
+      console.error('Request Error:', error.message);
+    }
+
     return Promise.reject(error);
   }
 );
