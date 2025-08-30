@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import MovieFilters from './MovieFilters';
 import { useNotification } from '../../context/NotificationContext';
 import { fetchMovies, deleteMovie, searchMovies } from '../../services/movieService';
+import axiosInstance from '../../api/axiosInstance';
 import './MovieListPage.css';
 
 const MovieListPage = () => {
@@ -28,8 +29,8 @@ const MovieListPage = () => {
             try {
                 //const response = await fetch('http://localhost:3000/api/genres');
                 const response = await axiosInstance.get('/genres');
-                const data = await response.json();
-                if (data.success) setGenres(data.genres);
+                console.log(response.data.genres);
+                if (response.data.success) setGenres(response.data.genres);
             } catch (error) {
                 showNotification('Ошибка загрузки жанров', 'error');
             }
@@ -135,7 +136,7 @@ const MovieListPage = () => {
                         >
                             {movie.image ? (
                                 <img 
-                                    src={`${movie.image}`} 
+                                    src={`/${movie.image}`} 
                                     alt={movie.title} 
                                     className="movie-poster"
                                     onError={(e) => {

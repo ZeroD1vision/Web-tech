@@ -9,8 +9,8 @@ const MoviePage = () => {
     const { id } = useParams();
     const { user } = useAuth();
     const { showNotification } = useNotification();
-    const [movie, setMovie] = React.useState(null);
-    const [loading, setLoading] = React.useState(true);
+    const [movie, setMovie] = useState(null);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     
     useEffect(() => {
@@ -77,15 +77,17 @@ const MoviePage = () => {
                 {/* Постер и базовая информация */}
                 <div className="movie-poster-section">
                     <div className="movie-poster-wrapper">
-                        <img 
-                            src={`http://localhost:3000/${movie.image}`} 
+                        {movie.image ? ( <img 
+                            src={`/${movie.image}`} 
                             alt={movie.title} 
                             className="movie-poster"
                             onError={(e) => {
                                 e.target.src = '/placeholder.jpg';
                                 e.target.onerror = null;
                             }}
-                        />
+                        /> ) : (
+                            <div className="image-placeholder">Нет изображения</div>
+                        )}
                     </div>
                     
                     <div className="movie-quick-info">
