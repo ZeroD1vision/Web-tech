@@ -62,21 +62,19 @@ const MovieFormPage = () => {
         // Загрузка данных
         const fetchData = async () => {
           try {
-            //const genresResponse = await fetch('http://localhost:3000/api/genres');
-            const response = await axiosInstance.get('/genres');
-            const genresData = await genresResponse.json();
+            const genresData = await axiosInstance.get('/genres');
             
-            if (genresData.success) {
-              setGenresList(genresData.genres);
+            if (genresData.data.success) {
+              setGenresList(genresData.data.genres);
               
               // Загрузка данных фильма только после получения жанров
               if (id) {
                 const movie = await getMovieById(id);
                 console.log('Movie genres:', movie.genre_ids);
-                console.log('All genres:', genresData.genres);
+                console.log('All genres:', genresData.data.genres);
                 
                 // Фильтруем жанры фильма по существующим в системе
-                const validGenres = genresData.genres
+                const validGenres = genresData.data.genres
                   .filter(g => movie.genre_ids?.includes(g.id))
                   .map(g => g.id);
 
@@ -281,18 +279,18 @@ const MovieFormPage = () => {
                   </Field>
 
                   <Field name="position" parse={Number}>
-  {({ input, meta }) => (
-    <div className={`form-group ${meta.error && meta.touched ? 'invalid' : ''}`}>
-      <label>Позиция в списке</label>
-      <input
-        {...input}
-        type="number"
-        min="0"
-      />
-      {meta.error && meta.touched && <div className="error-message">{meta.error}</div>}
-    </div>
-  )}
-</Field>
+                    {({ input, meta }) => (
+                      <div className={`form-group ${meta.error && meta.touched ? 'invalid' : ''}`}>
+                        <label>Позиция в списке</label>
+                        <input
+                          {...input}
+                          type="number"
+                          min="0"
+                        />
+                        {meta.error && meta.touched && <div className="error-message">{meta.error}</div>}
+                      </div>
+                    )}
+                  </Field>
                   
                   <div className="form-actions">
                     <button
