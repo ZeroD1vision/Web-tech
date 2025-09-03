@@ -3,6 +3,7 @@ import { Form, Field } from 'react-final-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useNotification } from '../../context/NotificationContext';
 import { useAuth } from '../../context/AuthContext';
+import axiosInstance from '../../api/axiosInstance';
 import { createMovie, updateMovie, getMovieById } from '../../services/movieService';
 import './MovieFormPage.css';
 
@@ -63,7 +64,6 @@ const MovieFormPage = () => {
         const fetchData = async () => {
           try {
             const genresData = await axiosInstance.get('/genres');
-            
             if (genresData.data.success) {
               setGenresList(genresData.data.genres);
               
