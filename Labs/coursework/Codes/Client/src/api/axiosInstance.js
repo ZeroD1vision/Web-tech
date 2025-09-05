@@ -9,23 +9,15 @@ const instance = axios.create({
   }
 });
 
-// Убираем перехватчик для добавления токена в заголовки
-
-// instance.interceptors.request.use(config => {
-//   const token = localStorage.getItem('accessToken');
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
 instance.interceptors.response.use(
-  response => response,
+  (response) => response,
   async error => {
     // Пропускаем обработку ошибок для страницы логина
     if (window.location.pathname === '/login') {
       return Promise.reject(error);
     }
+
+    const originalRequest = error.config;
 
     // Обработка просроченного access token
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -34,23 +26,16 @@ instance.interceptors.response.use(
       try {
         // Отправляем запрос на обновление токенов
         await instance.post('/auth/refresh', {}, { withCredentials: true });
-        // const refreshToken = localStorage.getItem('refreshToken');
-        // const response = await axios.post('/api/auth/refresh', { refreshToken });
-        
-        // localStorage.setItem('accessToken', response.data.accessToken);
-        // localStorage.setItem('refreshToken', response.data.refreshToken);
-
-        // originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
         
         // Повторяем исходный запрос с новым токеном
         return instance(originalRequest);
       } catch (refreshError) {
-        // localStorage.removeItem('accessToken');
-        // localStorage.removeItem('refreshToken');
+        console.log('Refresh failed, logging out');
         // Перенаправляем на логин при ошибке обновления
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login?session_expired=1';
         }
+        // Если ошибка не 401 или уже была попытка обновления — просто отклоняем промис с ошибкой
         return Promise.reject(refreshError);
       }
     }

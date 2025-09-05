@@ -33,27 +33,13 @@ const generateTokens = (user) => {
 };
 
 const refreshToken = async (req, res) => {
-    // const { refreshToken } = req.body;
-    
-    // try {
-    //     const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
-    //     const user = await db.findUserById(decoded.id);
-        
-    //     if (!user) throw new Error('Пользователь не найден');
-        
-    //     const newTokens = generateTokens(user);
-        
-    //     res.json({
-    //         success: true,
-    //         ...newTokens
-    //     });
-
     try {
         const refreshToken = req.cookies.refreshToken;
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
         const user = await db.findUserById(decoded.id);
 
         if (!user) {
+            console.log('No user with this token');
             return res.status(401).json({ success: false });
         }
 
@@ -81,6 +67,7 @@ const refreshToken = async (req, res) => {
         
         return res.json({ success: true });
     } catch (error) {
+        console.log('Mistake in generating tokens');
         // Очищаем куки при ошибке
         res.clearCookie('accessToken', getCookieOptions());
         res.clearCookie('refreshToken', getCookieOptions());
@@ -148,19 +135,6 @@ const registerUser = async (req, res) => {
             },
             message: 'Теперь вы зарегистрированы!'
         });
-        // const tokens = generateTokens(user);
-
-        // res.status(201).json({
-        //     success: true,
-        //     ...tokens,
-        //     user: {
-        //         id: user.id,
-        //         username: user.username,
-        //         nickname: user.nickname,
-        //         role: user.role // Добавляем роль в ответ
-        //     },
-        //     message: 'Теперь вы зарегестрированы!'
-        // });
     } catch (error) {
         res.status(400).json({
             success: false,
@@ -179,20 +153,6 @@ const loginUser = async (req, res) => {
         }
 
         const { accessToken, refreshToken } = generateTokens(user);
-
-        // const tokens = generateTokens(user);
-
-        // res.json({
-        //     success: true,
-        //     ...tokens,
-        //     user: {
-        //         id: user.id,
-        //         username: user.username,
-        //         nickname: user.nickname,
-        //         role: user.role // Добавляем роль в ответ
-        //     },
-        //     message: 'Вход выполнен успешно!'
-        // });
 
         // Устанавливаем куки
         res.cookie('accessToken', accessToken, {
