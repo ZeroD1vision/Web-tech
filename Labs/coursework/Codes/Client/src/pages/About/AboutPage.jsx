@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useRef, useEffect}from 'react';
 import './AboutPage.css';
-//import CinemaMap from '../../components/CinemaMap';
+import CinemaMap from '../../components/CinemaMap';
 
 const AboutPage = () => {
   const contacts = {
@@ -18,7 +18,7 @@ const AboutPage = () => {
       
       <section className="history-section">
         <h2>Наша история</h2>
-        <p>Основан в 1999 году как первый мультиплекс...</p>
+        <p>Основан в 2024 году как первый мульти...</p>
       </section>
 
       <section className="contacts-section">
