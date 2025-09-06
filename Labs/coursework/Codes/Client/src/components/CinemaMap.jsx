@@ -46,7 +46,7 @@ const CinemaMap = () => {
             suppressMapOpenBlock: true, // Убирает блок "Открыть в Яндекс.Картах"
             yandexMapDisablePoiInteractivity: false, // Включает интерактивность POI
             yandexMapAutoSwitch: false, // Отключает авто-переключение тем
-            theme: 'dark', // Ночная тема (доступны: 'day', 'night', 'contrast')
+            theme: 'night', // Ночная тема (доступны: 'day', 'night', 'contrast')
           });
 
           // Добавляем маркер с кастомной иконкой для кинотеатра
