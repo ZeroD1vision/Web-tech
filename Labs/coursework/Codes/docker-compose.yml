@@ -3,6 +3,13 @@ services:
   client:
     build:
       context: ./Client
+    # develop:
+    #   watch:
+    #     - action: sync
+    #       path: ./Client
+    #       target: /app
+    #     - action: rebuild
+    #       path: ./Client/package.json
     labels:
       - com.centurylinklabs.watchtower.enable=true
     ports:
@@ -16,6 +23,13 @@ services:
   server:
     build:
       context: ./Server
+    # develop:
+    #   watch:
+    #     - action: sync
+    #       path: ./Server
+    #       target: /app
+    #     - action: rebuild
+    #       path: ./Server/package.json
     labels:
       - com.centurylinklabs.watchtower.enable=true
       - "monitoring.enable=true"
@@ -67,6 +81,14 @@ services:
       - server
     networks:
       - cinema-network
+
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   volumes: 
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: --interval 30 --label-enable --cleanup
+  #   networks:
+  #     - cinema-network
 
 networks:
   cinema-network:
