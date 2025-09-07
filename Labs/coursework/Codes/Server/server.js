@@ -108,7 +108,9 @@ app.use(cookieParser());
 
 // Настройка CORS для безопасного взаимодействия с клиентом
 const corsOptions = {
-  origin: 'http://localhost:8080',
+  origin: process.env.NODE_ENV === 'production'
+    ? 'http://localhost:8080'
+    : ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

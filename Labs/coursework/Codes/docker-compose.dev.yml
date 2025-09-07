@@ -62,10 +62,10 @@ services:
       timeout: 5s
       retries: 5
 
-  networks:
-    cinema-network-dev:
-      driver: bridge
-
-  volumes:
-    postgres_data_dev:
+networks:
+  cinema-network-dev:
+    driver: bridge
+    
+volumes:
+  postgres_data_dev:
 
