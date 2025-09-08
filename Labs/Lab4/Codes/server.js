@@ -23,7 +23,7 @@ function getIp(callback){
     }else {
         console.error('Unknown platform: ' + platform);
         return;
-    }
+    } 
 
     exec(command, (error, stdout) => {
         if (error) {
