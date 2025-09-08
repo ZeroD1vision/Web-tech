@@ -1,7 +1,4 @@
 {
-  "dependencies": {
-    "prom-client": "^15.1.3"
-  },
   "scripts": {
     "dev:up": "docker-compose -f docker-compose.dev.yml up",
     "dev:down": "docker-compose -f docker-compose.dev.yml down",

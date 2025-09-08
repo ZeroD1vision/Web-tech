@@ -1,0 +1,71 @@
+version: '3.8'
+services:
+  client-dev:
+    build:
+      context: ./Client 
+      dockerfile: Dockerfile.dev
+    ports: 
+      - "3000:3000"
+    volumes: 
+      - ./Client:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_API_BASE_URL=http://localhost:3001
+    networks:
+      - cinema-network-dev
+    stdin_open: true
+    tty: true
+
+  server-dev:
+    build:
+      context: ./Server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./Server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}_dev
+      - DB_HOST=db-dev
+      - DB_PORT=5432
+      - JWT_SECRET=${JWT_SECRET}
+      - REFRESH_SECRET=${REFRESH_SECRET}
+      - CLIENT_URL=http://localhost:3000
+    depends_on: 
+      db-dev:
+        condition: service_healthy
+    networks:
+      - cinema-network-dev
+
+  db-dev:
+    image: postgres:17
+    container_name: cinema-db-dev
+    environment: 
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}_dev
+    volumes:
+      - ./Server/config/db.sql:/docker-entrypoint-initdb.d/db.sql
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - cinema-network-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U %{DB_USER} -d ${DB_NAME}_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  cinema-network-dev:
+    driver: bridge
+    
+volumes:
+  postgres_data_dev:
+
